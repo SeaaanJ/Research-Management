@@ -1,75 +1,55 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Research Dashboard') }}
-            </h2>
-            {{-- User ID Badge --}}
-            <div class="bg-gray-900 text-white px-4 py-1 rounded-full text-sm">
-                Your ID: <span class="font-mono font-bold text-indigo-400">{{ Auth::id() }}</span>
-            </div>
-        </div>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Home') }}
+        </h2>
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            
+            {{-- Welcome Section --}}
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-100 p-8 text-center">
+                <div class="flex flex-col items-center justify-center space-y-4">
+                    {{-- Icon Placeholder --}}
+                    <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                        </svg>
+                    </div>
 
-            {{-- Create Group Card --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-b border-gray-200">
-                <h3 class="text-lg font-bold mb-4">Start a New Project</h3>
-                <form action="{{ route('groups.store') }}" method="POST" class="flex gap-4">
-                    @csrf
-                    <x-text-input name="name" placeholder="Group Name (e.g. Quantum Lab)" class="w-full" required />
-                    <x-primary-button>Create</x-primary-button>
-                </form>
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        Welcome back, {{ Auth::user()->first_name }}!
+                    </h1>
+                    
+                    <p class="text-gray-500 max-w-sm mx-auto">
+                        This is your personal dashboard. Start by exploring groups or checking your recent activity.
+                    </p>
+
+                    <div class="flex gap-3 mt-4">
+                        <a href="{{ route('groups') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 transition">
+                            View Groups
+                        </a>
+                        <a href="#" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 transition">
+                            Explore
+                        </a>
+                    </div>
+                </div>
             </div>
 
-            {{-- Groups Grid --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                @forelse ($groups as $group)
-                    <div class="bg-white shadow-sm sm:rounded-lg p-6 border border-gray-100">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h4 class="text-xl font-black text-gray-900">{{ $group->name }}</h4>
-                                <p class="text-xs text-gray-400">Project ID: #{{ $group->id }}</p>
-                            </div>
-                            {{-- ✅ View Group Button --}}
-    <a href="{{ route('groups.show', $group) }}"
-       class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition">
-        View Group →
-    </a>
-                        </div>
-
-                        {{-- Invite Section --}}
-                        <div class="mt-4 pt-4 border-t border-gray-50">
-                            <form action="{{ route('groups.invite', $group) }}" method="POST" class="space-y-2">
-                                @csrf
-                                <label class="text-xs font-semibold text-gray-500 uppercase">Invite Researcher (by ID)</label>
-                                <div class="flex gap-2">
-                                    <x-text-input name="user_id" type="number" placeholder="Enter ID..." class="w-full text-sm" required />
-                                    <button class="bg-indigo-600 text-white px-3 py-1 rounded-md text-sm hover:bg-indigo-700">Add</button>
-                                </div>
-                            </form>
-                        </div>
-
-                        {{-- Member List --}}
-                        <div class="mt-6">
-                            <p class="text-xs font-bold text-gray-400 uppercase mb-2">Team Members</p>
-                            <div class="flex flex-wrap gap-2">
-                                @foreach ($group->users as $member)
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-gray-100 text-gray-800 border border-gray-200">
-                                        {{ $member->first_name }} {{ $member->last_name }}
-                                    </span>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <div class="col-span-full bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl p-12 text-center">
-                        <p class="text-gray-500">You haven't joined or created any groups yet.</p>
-                    </div>
-                @endforelse
+            {{-- Secondary Content Area (Empty Grid) --}}
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="h-32 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center text-gray-400 text-sm italic">
+                    Recent Activity placeholder
+                </div>
+                <div class="h-32 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center text-gray-400 text-sm italic">
+                    Upcoming Events placeholder
+                </div>
+                <div class="h-32 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center text-gray-400 text-sm italic">
+                    Statistics placeholder
+                </div>
             </div>
+
         </div>
     </div>
 </x-app-layout>

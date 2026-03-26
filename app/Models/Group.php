@@ -29,4 +29,9 @@ class Group extends Model
     {
         return $this->hasMany(ResearchPaper::class);
     }
+
+    public function invites()
+    {
+        return $this->hasMany(GroupInvite::class);
+    }
 }

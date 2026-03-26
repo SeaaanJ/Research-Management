@@ -50,20 +50,6 @@ class User extends Authenticatable
         ];
     }
 
-    // public function groups()
-    // {
-    //     return $this->hasMany(Group::class);
-    // }
-
-    // public function user()
-    // {
-    //     return $this->belongsTo(User::class);
-    // }
-
-    // public function researchPapers()
-    // {
-    //     return $this->hasManyThrough(ResearchPaper::class, Group::class);
-    // }
 
     public function groups()
 {
@@ -75,4 +61,21 @@ class User extends Authenticatable
         return trim("{$this->first_name} {$this->middle_name} {$this->last_name}");
     }
 
+
+    public function receivedInvites()
+    {
+        return $this->hasMany(GroupInvite::class, 'receiver_id');
+    }
+    public function sentInvites()
+    {
+        return $this->hasMany(GroupInvite::class, 'sender_id');
+    }
+
+    public function pendingInvites()
+    {
+        return $this->hasMany(GroupInvite::class, 'receiver_id')->where('status', 'pending')->with(['group', 'sender']);
+
+    }
+
+    
 }

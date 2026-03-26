@@ -3,8 +3,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\GroupController;
-use App\Http\Controllers\ResearchPaperController; // ✅ Add this
-
+use App\Http\Controllers\ResearchPaperController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -20,14 +19,31 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // Group routes
     Route::post('/groups', [GroupController::class, 'store'])->name('groups.store');
     Route::post('/groups/{group}/invite', [GroupController::class, 'invite'])->name('groups.invite');
+    Route::get('/groups/{group}/confirm-delete', [GroupController::class, 'confirmDelete'])->name('groups.confirm-delete');
+    Route::delete('/groups/{group}', [GroupController::class, 'destroy'])->name('groups.destroy');
 
-    // ✅ Make sure these are here too
+    //  Invite response routes
+    Route::post('/invites/{invite}/accept', [GroupController::class, 'acceptInvite'])->name('invites.accept');
+    Route::post('/invites/{invite}/decline', [GroupController::class, 'declineInvite'])->name('invites.decline');
+
+    // Paper routes
     Route::get('/groups/{group}', [ResearchPaperController::class, 'show'])->name('groups.show');
     Route::post('/groups/{group}/papers', [ResearchPaperController::class, 'store'])->name('papers.store');
+    Route::get('/papers/{paper}/view', [ResearchPaperController::class, 'view'])->name('papers.view');
     Route::get('/papers/{paper}/download', [ResearchPaperController::class, 'download'])->name('papers.download');
     Route::delete('/papers/{paper}', [ResearchPaperController::class, 'destroy'])->name('papers.destroy');
+
+    // Nave Routes
+   Route::get('/groups', function () {
+    // We must fetch $groups here so grouptab.blade.php doesn't crash
+    $groups = auth()->user()->groups ?? collect(); 
+
+    return view('groupstab', compact('groups'));
+})->name('groups');
+
 });
 
 require __DIR__.'/auth.php';

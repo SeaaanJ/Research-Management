@@ -42,17 +42,23 @@
     {{-- Features Section --}}
     <section class="bg-gray-50 py-20 px-8 fade-up">
         <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-           @foreach ([
-        ['🧠', 'Synthesis Sync', 'Automatically aggregates team notes into a unified, searchable knowledge graph.'],
-        ['👥', 'Role-Based Workspaces', 'Assign Lead Researchers, Analysts, and Reviewers with custom permissions.'],
-        ['🔭', 'Smart Discovery Feed', 'AI suggests new papers based on the collective interest of your entire group.']
-    ] as [$icon, $title, $desc])
-        <div class="p-6 rounded-xl bg-dark-50 border border-gray-800 hover:border-gray-600 transition-all fade-up ">
-            <div class="text-3xl mb-5">{{ $icon }}</div>
-            <h3 class="text-xl font-bold text-black mb-2">{{ $title }}</h3>
-            <p class="text-gray-400 leading-relaxed">{{ $desc }}</p>
-        </div>
-    @endforeach
+       @php
+    $features = [
+        ['<img src="images/brain.svg" alt="Sync">', 'Synthesis Sync', 'Automatically aggregates team notes into a unified, searchable knowledge graph.'],
+        ['<img src="images/ppl.svg" alt="Roles">', 'Role-Based Workspaces', 'Assign Lead Researchers, Analysts, and Reviewers with custom permissions.'],
+        ['<img src="images/telescope.svg" alt="Feed">', 'Smart Discovery Feed', 'AI suggests new papers based on the collective interest of your entire group.']
+    ];
+@endphp
+
+@foreach($features as [$icon, $title, $desc])
+    <div class="p-6 rounded-xl bg-dark-50 border border-gray-800...">
+        {{-- 2. Use {!! !!} to render the raw HTML/SVG tag --}}
+        <div class="text-3xl mb-5">{!! $icon !!}</div>
+        
+        <h3 class="text-xl font-bold text-black mb-2">{{ $title }}</h3>
+        <p class="text-gray-400">{{ $desc }}</p>
+    </div>
+@endforeach
         </div>
     </section>
 
