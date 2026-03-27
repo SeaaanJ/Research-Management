@@ -1,28 +1,21 @@
 import "./bootstrap";
 import Alpine from "alpinejs";
+import * as pdfjsLib from "pdfjs-dist";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.5.207/build/pdf.worker.min.mjs`;
 
 window.Alpine = Alpine;
 Alpine.start();
 
-/**
- * Global State & Constants
- */
 let currentGroupId = null;
 let rotationTimer = null;
-const ROTATION_TIME = 20000; // 20 seconds
+const ROTATION_TIME = 10000;
 let timeLeft = ROTATION_TIME;
 
-/**
- * Helper: Get CSRF token from the meta tag
- * (Blade syntax like {{ csrf_token() }} does NOT work in .js files)
- */
 const getCsrfToken = () =>
     document.querySelector('meta[name="csrf-token"]')?.getAttribute("content");
-
-/**
- * 1. Scroll Animation Observer
- */
 document.addEventListener("DOMContentLoaded", () => {
+    // Fade up observer
     const elements = document.querySelectorAll(".fade-up");
     const observer = new IntersectionObserver(
         (entries) => {
@@ -36,13 +29,26 @@ document.addEventListener("DOMContentLoaded", () => {
         { threshold: 0.15 },
     );
     elements.forEach((el) => observer.observe(el));
+
+    //  Flash message auto dismiss
+    ["flash-success", "flash-error"].forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        setTimeout(() => {
+            el.style.opacity = "0";
+            setTimeout(() => el.remove(), 500);
+        }, 4500);
+    });
 });
 
-/**
- * 2. Delete Modal Logic
- */
+window.dismissFlash = function (id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.opacity = "0";
+    setTimeout(() => el.remove(), 500);
+};
 
-// Fetches a new confirmation string from the server
 async function refreshString() {
     if (!currentGroupId) return;
 
@@ -64,7 +70,7 @@ async function refreshString() {
             setTimeout(() => {
                 display.textContent = data.confirm_string;
                 display.classList.remove("opacity-0");
-                timeLeft = ROTATION_TIME; // Reset the internal timer
+                timeLeft = ROTATION_TIME;
             }, 200);
         }
     } catch (e) {
@@ -72,7 +78,6 @@ async function refreshString() {
     }
 }
 
-// Handles the visual progress bar
 function startProgressBar() {
     const progressBar = document.getElementById("stringProgress");
     const tickRate = 100;
@@ -86,7 +91,6 @@ function startProgressBar() {
 
         if (progressBar) {
             progressBar.style.width = `${percentage}%`;
-            // Switch color to red when running low on time
             if (timeLeft < 5000) {
                 progressBar.classList.add("bg-red-500");
                 progressBar.classList.remove("bg-indigo-500");
@@ -96,16 +100,19 @@ function startProgressBar() {
             }
         }
 
-        if (timeLeft <= 0) refreshString();
+        if (timeLeft <= 0) {
+            timeLeft = ROTATION_TIME;
+            refreshString();
+        }
     }, tickRate);
 }
 
-/**
- * Modal Control Functions (Attached to window for HTML access)
- */
 window.openDeleteModal = function (groupId, groupName) {
     currentGroupId = groupId;
     clearErrors();
+
+    clearInterval(rotationTimer);
+    rotationTimer = null;
 
     const groupNameDisplay = document.getElementById("modalGroupName");
     if (groupNameDisplay) groupNameDisplay.textContent = groupName;
@@ -139,7 +146,6 @@ window.submitDelete = function () {
     const password = document.getElementById("deletePassword").value;
     const btn = document.getElementById("deleteBtn");
 
-    // Basic client-side validation
     if (!confirmString) {
         showFieldError("confirm", "Please enter the confirmation code.");
         shakeInput("confirmStringInput");
@@ -196,9 +202,13 @@ window.togglePassword = function () {
     if (input) input.type = input.type === "password" ? "text" : "password";
 };
 
-/**
- * UI Helpers
- */
+window.handleFileUpload = function (event) {
+    const file = event.target.files[0];
+    if (file) {
+        console.log("Selected file:", file.name);
+    }
+};
+
 function showFieldError(field, message) {
     const errorContainerId =
         field === "confirm" ? "confirmError" : "passwordError";
@@ -207,34 +217,28 @@ function showFieldError(field, message) {
     const inputId =
         field === "confirm" ? "confirmStringInput" : "deletePassword";
 
-    const container = document.getElementById(errorContainerId);
+    document.getElementById(errorContainerId)?.classList.remove("hidden");
     const text = document.getElementById(errorTextId);
-    const input = document.getElementById(inputId);
-
-    if (container) container.classList.remove("hidden");
     if (text) text.textContent = message;
-    if (input) input.classList.add("border-red-400");
+    document.getElementById(inputId)?.classList.add("border-red-400");
 }
 
 function showGlobalError(message) {
-    const container = document.getElementById("globalError");
+    document.getElementById("globalError")?.classList.remove("hidden");
     const text = document.getElementById("globalErrorText");
-    if (container) container.classList.remove("hidden");
     if (text) text.textContent = message;
 }
 
 function showGlobalSuccess(message) {
-    const container = document.getElementById("globalSuccess");
+    document.getElementById("globalSuccess")?.classList.remove("hidden");
     const text = document.getElementById("globalSuccessText");
-    if (container) container.classList.remove("hidden");
     if (text) text.textContent = message;
 }
 
 function clearErrors() {
     ["confirmError", "passwordError", "globalError", "globalSuccess"].forEach(
         (id) => {
-            const el = document.getElementById(id);
-            if (el) el.classList.add("hidden");
+            document.getElementById(id)?.classList.add("hidden");
         },
     );
     document
@@ -261,15 +265,135 @@ function resetBtn() {
     }
 }
 
-// Global Listeners
 document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") window.closeDeleteModal();
 });
 
-window.handleFileUpload = function (event) {
-    const file = event.target.files[0];
-    if (file) {
-        console.log("Selected file:", file.name);
-        // You could add logic here to validate size or show a preview
+window.togglePassword = function () {
+    const input = document.getElementById("deletePassword");
+    const icon = document.getElementById("eyeIcon");
+    if (!input) return;
+
+    const isPassword = input.type === "password";
+    input.type = isPassword ? "text" : "password";
+
+    icon.innerHTML = isPassword
+        ? // EYE-SLASH (currently visible, click to hide)
+          `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 3l18 18M10.584 10.587a2 2 0 002.828 2.83M9.363 5.365A9.466 9.466 0 0112 5c4.478 0 8.268 2.943 9.543 7a9.957 9.957 0 01-1.563 2.942M6.673 6.668A9.955 9.955 0 002.457 12c1.274 4.057 5.065 7 9.543 7a9.454 9.454 0 004.942-1.358" />`
+        : // EYE (currently hidden, click to show)
+          `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
+};
+
+let currentPDF = null;
+let annotationCount = 0; // Added to track comment numbers
+
+window.openViewModal = function (
+    id,
+    title,
+    topic,
+    fileType,
+    published,
+    viewUrl,
+    downloadUrl,
+    isOwner,
+) {
+    const modal = document.getElementById("viewPaperModal");
+    modal.classList.remove("hidden");
+
+    document.getElementById("viewPaperTitle").innerText = title;
+    document.getElementById("viewPaperTopic").innerText = topic;
+    document.getElementById("viewPaperIcon").innerText =
+        fileType === "pdf" ? "📄" : "📝";
+    document.getElementById("viewPaperDownloadLink").href = downloadUrl;
+
+    const statusLabel = document.getElementById("viewPaperStatus");
+    statusLabel.innerText = published ? "Published" : "Draft";
+    statusLabel.className = published
+        ? "text-xs font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700"
+        : "text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500";
+
+    const viewer = document.getElementById("pdfViewer");
+    const loading = document.getElementById("viewPaperLoading");
+    const fallback = document.getElementById("viewPaperFallback");
+    const commentsList = document.getElementById("commentsList");
+
+    viewer.innerHTML = "";
+    if (commentsList) commentsList.innerHTML = ""; // Clear sidebar on open
+    annotationCount = 0; // Reset counter
+    loading.classList.remove("hidden");
+    fallback.classList.add("hidden");
+
+    if (fileType === "pdf") {
+        pdfjsLib
+            .getDocument(viewUrl)
+            .promise.then((pdf) => {
+                currentPDF = pdf;
+                loading.classList.add("hidden");
+                renderAllPages(pdf);
+            })
+            .catch((err) => {
+                console.error(err);
+                loading.classList.add("hidden");
+                fallback.classList.remove("hidden");
+            });
+    } else {
+        loading.classList.add("hidden");
+        fallback.classList.remove("hidden");
+        document.getElementById("viewPaperFallbackDownload").href = downloadUrl;
     }
+};
+
+async function renderAllPages(pdf) {
+    const viewer = document.getElementById("pdfViewer");
+    for (let i = 1; i <= pdf.numPages; i++) {
+        try {
+            const page = await pdf.getPage(i);
+            const viewport = page.getViewport({ scale: 1.5 });
+
+            // Create relative wrapper for markers
+            const wrapper = document.createElement("div");
+            wrapper.className =
+                "page-wrapper relative shadow-lg bg-white mb-6 mx-auto border border-gray-200";
+            wrapper.style.width = viewport.width + "px";
+            wrapper.style.height = viewport.height + "px";
+
+            const canvas = document.createElement("canvas");
+            const context = canvas.getContext("2d");
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            wrapper.appendChild(canvas);
+            viewer.appendChild(wrapper);
+
+            // Click listener for markers
+            wrapper.addEventListener("click", (e) => {
+                const rect = wrapper.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                addCommentAtPosition(wrapper, x, y);
+            });
+
+            await page.render({ canvasContext: context, viewport: viewport })
+                .promise;
+        } catch (e) {
+            console.error("Error rendering page:", i, e);
+        }
+    }
+}
+
+window.closeViewModal = function () {
+    const modal = document.getElementById("viewPaperModal");
+    if (modal) modal.classList.add("hidden");
+
+    const viewer = document.getElementById("pdfViewer");
+    if (viewer) viewer.innerHTML = "";
+
+    const commentsList = document.getElementById("commentsList");
+    if (commentsList) commentsList.innerHTML = "";
+
+    currentPDF = null;
 };

@@ -94,3 +94,18 @@
 .animate-shake {
     animation: shake 0.4s ease;
 }
+
+/* Prevent the iframe from showing a scrollbar at all */
+#viewPaperFrame {
+    overflow: hidden !important;
+    display: block;
+}
+
+/* Ensure the annotation layers are perfectly aligned with the iframe */
+#annotationViewLayer,
+#annotationLayer {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}

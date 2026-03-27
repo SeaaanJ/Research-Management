@@ -86,12 +86,12 @@
                 <p class="text-gray-500 mt-1">students served worldwide</p>
             </div>
             <div class="fade-up delay-5">
-                <p class="text-6xl font-extrabold text-indigo-600">1</p>
+                <p class="text-6xl font-extrabold text-indigo-600">{{ \App\Models\ResearchPaper::count() }}</p>
                 <p class="text-gray-500 mt-1">Research papers indexed</p>
             </div>
             <div class="fade-up delay-6">
-                <p class="text-6xl font-extrabold text-indigo-600">1x</p>
-                <p class="text-gray-500 mt-1">Research impact</p>
+                <p class="text-6xl font-extrabold text-indigo-600">{{ \App\Models\ResearchPaper::where('published', true)->count() }}</p>
+                <p class="text-gray-500 mt-1">Research Papers Published</p>
             </div>
         </div>
 

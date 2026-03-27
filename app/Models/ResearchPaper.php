@@ -1,5 +1,4 @@
 <?php
-// app/Models/ResearchPaper.php
 
 namespace App\Models;
 
@@ -11,10 +10,18 @@ class ResearchPaper extends Model
         'group_id',
         'user_id',
         'title',
+        'topic',
         'description',
         'file_path',
         'file_name',
         'file_type',
+        'published',
+        'published_at',
+    ];
+
+    protected $casts = [
+        'published'    => 'boolean',
+        'published_at' => 'datetime',
     ];
 
     public function group()
@@ -25,5 +32,11 @@ class ResearchPaper extends Model
     public function uploader()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    // ✅ Add this
+    public function annotations()
+    {
+        return $this->hasMany(PaperAnnotation::class, 'paper_id');
     }
 }
