@@ -1,24 +1,21 @@
 <?php
+// app/Models/PaperComment.php
 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class PaperAnnotation extends Model
+class PaperComment extends Model
 {
-    protected $table = 'paper_annotations';
-
     protected $fillable = [
-        'paper_id',
+        'research_paper_id',
         'user_id',
-        'x',
-        'y',
         'comment',
     ];
 
     public function paper()
     {
-        return $this->belongsTo(ResearchPaper::class, 'paper_id');
+        return $this->belongsTo(ResearchPaper::class, 'research_paper_id');
     }
 
     public function user()

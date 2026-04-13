@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <div>
-                <a href="{{ route('groups') }}" class="text-sm text-indigo-600 hover:underline">Back</a>
+                <a href="{{ route('groups') }}" class="text-sm text-indigo-600 hover:underline">&larr; Back</a>
                 <h2 class="font-semibold text-xl text-gray-800 mt-1">{{ $group->name }}</h2>
             </div>
             <span class="text-xs text-gray-400">Group ID: #{{ $group->id }}</span>
@@ -12,7 +12,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-            {{-- Upload Modal Trigger --}}
+            {{-- ── Upload Modal Trigger ── --}}
             <div x-data="{ openUpload: false }">
                 <div class="flex justify-end mb-6">
                     <button
@@ -29,10 +29,12 @@
                      style="display: none;">
                     <div @click.outside="openUpload = false"
                          class="bg-white w-full max-w-lg rounded-xl p-6 shadow-lg border border-gray-100">
+
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-lg font-bold text-gray-900">Upload New Project</h3>
                             <button @click="openUpload = false" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
                         </div>
+
                         <form action="{{ route('papers.store', $group) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                             @csrf
 
@@ -43,7 +45,7 @@
                                 @error('title') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
 
-                            {{-- Topic / Subject --}}
+                            {{-- Topic --}}
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Topic / Subject</label>
                                 <select name="topic" required
@@ -133,7 +135,7 @@
             </div>
             {{-- END Upload Modal --}}
 
-            {{-- Main Layout --}}
+            {{-- ── Main Layout ── --}}
             <div class="flex gap-6">
 
                 {{-- LEFT — Papers --}}
@@ -141,12 +143,12 @@
 
                     {{-- Flash Messages --}}
                     @if(session('success'))
-                        <div id="flash-success" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+                        <div id="flash-success" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg transition-opacity duration-500">
                             {{ session('success') }}
                         </div>
                     @endif
                     @if(session('error'))
-                        <div id="flash-error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                        <div id="flash-error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg transition-opacity duration-500">
                             {{ session('error') }}
                         </div>
                     @endif
@@ -191,10 +193,10 @@
 
                                                 <p class="text-xs text-gray-400 mt-1">
                                                     Uploaded by {{ $paper->uploader->first_name }} {{ $paper->uploader->last_name }}
-                                                    · {{ $paper->created_at->diffForHumans() }}
-                                                    · <span class="uppercase font-mono">{{ $paper->file_type }}</span>
+                                                    &middot; {{ $paper->created_at->diffForHumans() }}
+                                                    &middot; <span class="uppercase font-mono">{{ $paper->file_type }}</span>
                                                     @if($paper->published && $paper->published_at)
-                                                        · Published {{ $paper->published_at->diffForHumans() }}
+                                                        &middot; Published {{ $paper->published_at->diffForHumans() }}
                                                     @endif
                                                 </p>
                                             </div>
@@ -204,18 +206,19 @@
                                         <div class="flex items-center gap-2 flex-wrap pt-2 border-t border-gray-100">
 
                                             {{-- View --}}
-                                           <button onclick="openViewModal(
-                                            {{ $paper->id }},
-                                            '{{ addslashes($paper->title) }}',
-                                            '{{ addslashes($paper->topic) }}',
-                                            '{{ $paper->file_type }}',
-                                            {{ $paper->published ? 'true' : 'false' }},
-                                            '{{ route('papers.view', $paper) }}',
-                                            '{{ route('papers.download', $paper) }}',
-                                            {{ $paper->user_id === auth()->id() ? 'true' : 'false' }}
-                                        )" class="bg-gray-900 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-indigo-600 transition">
-                                            View
-                                        </button>
+                                            <button onclick="openViewModal(
+                                                {{ $paper->id }},
+                                                '{{ addslashes($paper->title) }}',
+                                                '{{ addslashes($paper->topic) }}',
+                                                '{{ $paper->file_type }}',
+                                                {{ $paper->published ? 'true' : 'false' }},
+                                                '{{ route('papers.view', $paper) }}',
+                                                '{{ route('papers.download', $paper) }}',
+                                                {{ $paper->user_id === auth()->id() ? 'true' : 'false' }}
+                                            )"
+                                            class="bg-gray-900 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-indigo-600 transition">
+                                                View
+                                            </button>
 
                                             {{-- Download --}}
                                             <a href="{{ route('papers.download', $paper) }}"
@@ -223,7 +226,7 @@
                                                 Download
                                             </a>
 
-                                            {{-- Delete --}}
+                                            {{-- Delete (owner only) --}}
                                             @if($paper->user_id === auth()->id())
                                                 <form method="POST" action="{{ route('papers.destroy', $paper) }}" class="ml-auto">
                                                     @csrf
@@ -269,9 +272,8 @@
                             @endforeach
                         </div>
                     </div>
-                    {{-- END Members Card --}}
 
-                   {{-- Stats Card --}}
+                    {{-- Stats Card --}}
                     <div class="bg-white shadow-sm rounded-xl p-6 border border-gray-100">
                         <h3 class="text-sm font-bold text-gray-400 uppercase mb-4">Stats</h3>
 
@@ -294,10 +296,9 @@
                             </div>
                         </div>
 
-                        {{-- Publish button --}}
+                        {{-- Publish / Unpublish button --}}
                         <div class="mt-5 pt-4 border-t border-gray-100">
                             @if($group->user_id === auth()->id())
-                                {{-- Owner --}}
                                 @if($papers->where('published', false)->count() > 0)
                                     <form method="POST" action="{{ route('papers.publishAll', $group) }}">
                                         @csrf
@@ -323,9 +324,7 @@
                                     </form>
                                 @endif
                             @else
-                                {{-- Non-owner --}}
-                                <button
-                                    disabled
+                                <button disabled
                                     title="Only the group owner can publish all papers"
                                     class="w-full bg-gray-100 text-gray-400 text-xs font-semibold py-2 rounded-lg cursor-not-allowed flex items-center justify-center gap-2 border border-gray-200">
                                     Publish All
@@ -336,7 +335,6 @@
                             @endif
                         </div>
                     </div>
-                    {{-- END Stats Card --}}
 
                 </div>
                 {{-- END RIGHT --}}
@@ -348,62 +346,143 @@
     </div>
 
 
-    {{-- VIEW PAPER MODAL --}}
+    {{--VIEW PAPER MODAL--}}
     <div id="viewPaperModal" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeViewModal()"></div>
-        <div class="relative flex items-center justify-center min-h-screen px-4 py-6">
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl z-10 flex flex-col" style="height: 90vh;">
 
-                {{-- Header --}}
+        {{-- Backdrop --}}
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeViewModal()"></div>
+
+        {{-- Dialog --}}
+        <div class="relative flex items-center justify-center min-h-screen px-4 py-6 pointer-events-none">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-7xl pointer-events-auto flex flex-col" style="height: 90vh;">
+
+                {{-- ── Modal Header ── --}}
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
-                    <div class="flex items-center gap-3">
-                        <span id="viewPaperIcon" class="text-2xl"></span>
-                        <div>
-                            <h3 id="viewPaperTitle" class="text-lg font-black text-gray-900"></h3>
+                    <div class="flex items-center gap-3 min-w-0">
+                        <span id="viewPaperIcon" class="text-2xl shrink-0"></span>
+                        <div class="min-w-0">
+                            <h3 id="viewPaperTitle" class="text-lg font-black text-gray-900 truncate"></h3>
                             <div class="flex items-center gap-2 mt-0.5">
-                                <span id="viewPaperStatus" class="text-xs font-semibold px-2 py-0.5 rounded-full"></span>
-                                <span id="viewPaperTopic" class="text-xs text-gray-400"></span>
+                                <span id="viewPaperStatus" class="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0"></span>
+                                <span id="viewPaperTopic" class="text-xs text-gray-400 truncate"></span>
                             </div>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button id="drawModeBtn" onclick="toggleDrawMode()" class="hidden bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-indigo-100 hover:text-indigo-700 transition">
-                            ✏️ Draw Mode
-                        </button>
-                        <a id="viewPaperDownloadLink" href="#" class="bg-indigo-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition">
+                    <div class="flex items-center gap-2 shrink-0 ml-4">
+                        <a id="viewPaperDownloadLink" href="#"
+                           class="bg-indigo-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition">
                             Download
                         </a>
-                        <button onclick="closeViewModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none ml-2">&times;</button>
+                        <button onclick="closeViewModal()"
+                                class="text-gray-400 hover:text-gray-600 text-2xl leading-none ml-1">
+                            &times;
+                        </button>
                     </div>
                 </div>
+                {{-- END Modal Header --}}
 
-                {{-- Body --}}
-                <div class="flex-1 relative overflow-hidden bg-gray-500">
-                    <div id="viewPaperLoading" class="absolute inset-0 flex items-center justify-center bg-gray-50 z-10">
-                        <div class="text-center space-y-3">
-                            <svg class="w-8 h-8 animate-spin text-indigo-500 mx-auto" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                            </svg>
-                            <p class="text-sm text-gray-400">Loading document...</p>
+                {{-- ── Modal Body ── --}}
+                <div class="flex-1 flex overflow-hidden">
+
+                    {{-- LEFT — PDF / Doc Viewer --}}
+                    <div class="flex-1 relative overflow-hidden bg-gray-100">
+
+                        {{-- Loading spinner --}}
+                        <div id="viewPaperLoading"
+                             class="absolute inset-0 flex items-center justify-center bg-gray-50 z-10">
+                            <div class="text-center space-y-3">
+                                <svg class="w-8 h-8 animate-spin text-indigo-500 mx-auto"
+                                     fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10"
+                                            stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor"
+                                          d="M4 12a8 8 0 018-8v8z"/>
+                                </svg>
+                                <p class="text-sm text-gray-400">Loading document...</p>
+                            </div>
                         </div>
-                    </div>
 
-                    <div id="viewPaperFallback" class="hidden absolute inset-0 flex items-center justify-center bg-gray-50 z-10">
-                        <div class="text-center space-y-3 p-8">
-                            <span class="text-5xl">📝</span>
-                            <p class="text-gray-700 font-semibold">Preview not available</p>
-                            <a id="viewPaperFallbackDownload" href="#" class="inline-block bg-indigo-600 text-white text-sm font-semibold px-5 py-2 rounded-xl hover:bg-indigo-700 transition">Download File</a>
+                        {{-- Fallback (unsupported file type) --}}
+                        <div id="viewPaperFallback"
+                             class="hidden absolute inset-0 flex items-center justify-center bg-gray-50 z-10">
+                            <div class="text-center space-y-3 p-8">
+                                <p class="text-gray-700 font-semibold">
+                                    Preview not available for this file type
+                                </p>
+                                <p class="text-sm text-gray-400">
+                                    Download the file to view its contents.
+                                </p>
+                                <a id="viewPaperFallbackDownload" href="#"
+                                   class="inline-block bg-indigo-600 text-white text-sm font-semibold px-5 py-2 rounded-xl hover:bg-indigo-700 transition">
+                                    Download File
+                                </a>
+                            </div>
                         </div>
-                    </div>
 
-                    <div id="scrollContainer" class="relative w-full h-full overflow-auto p-4">
-                        <div id="pdfViewer" class="flex flex-col items-center gap-4"></div>
+                        {{-- Scrollable PDF container --}}
+                        <div id="scrollContainer" class="relative w-full h-full overflow-auto">
+                            <div id="pdfViewer"
+                                 class="flex flex-col items-center gap-4 py-4 min-h-full">
+                            </div>
+                        </div>
+
                     </div>
+                    {{-- END LEFT --}}
+
+                    {{-- RIGHT — Comments Sidebar --}}
+                    <div class="w-72 border-l border-gray-100 bg-white flex flex-col shrink-0">
+
+                        {{-- Sidebar Header --}}
+                        <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between shrink-0">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wide">Comments</h4>
+                            <span id="commentCount"
+                                  class="bg-indigo-100 text-indigo-600 text-xs font-bold px-2 py-0.5 rounded-full min-w-[1.5rem] text-center">
+                                0
+                            </span>
+                        </div>
+
+                        {{-- Comments List --}}
+                        <div id="commentsList"
+                             class="flex-1 overflow-y-auto p-3 space-y-2 min-h-0">
+                            <p class="text-xs text-gray-400 text-center mt-4">Loading comments...</p>
+                        </div>
+
+                        {{-- Comment Input --}}
+                        <div class="p-3 border-t border-gray-100 shrink-0">
+                            <textarea
+                                id="commentInput"
+                                rows="3"
+                                placeholder="Write a comment..."
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
+                                       focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none">
+                            </textarea>
+                            <button
+                                id="commentSubmitBtn"
+                                onclick="window.submitComment()"
+                                class="mt-2 w-full bg-indigo-600 text-white text-xs font-semibold py-2
+                                       rounded-lg hover:bg-indigo-700 transition disabled:opacity-60">
+                                Post Comment
+                            </button>
+                        </div>
+
+                    </div>
+                    {{-- END Comments Sidebar --}}
+
                 </div>
+                {{-- END Modal Body --}}
+
             </div>
         </div>
     </div>
+    {{-- END VIEW PAPER MODAL --}}
 
-    
+
+    {{-- ── Blade → JS globals ── --}}
+    <script>
+        window.__authUserId     = {{ auth()->id() }};
+        window.__groupOwnerId   = {{ $group->user_id }};
+        window.__authFirstName  = @json(auth()->user()->first_name);
+        window.__authLastName   = @json(auth()->user()->last_name);
+    </script>
+
 </x-app-layout>

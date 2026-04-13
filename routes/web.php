@@ -7,7 +7,8 @@ use App\Http\Controllers\ResearchPaperController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
-use App\Http\Controllers\PaperAnnotationController;
+use App\Http\Controllers\PaperCommentController;
+
 
 Route::get('/', function () {
     return view('landing');
@@ -58,12 +59,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/groups/{group}/unpublish-all', [ResearchPaperController::class, 'unpublishAll'])->name('papers.unpublishAll');  // UnPublish all, Visible to Group Owner, Adviser and Admins only
 
 
-    // Annotation routes
-    Route::get('/papers/{researchPaper}/annotations', [PaperAnnotationController::class, 'index'])->name('annotations.index');
-    Route::post('/papers/{researchPaper}/annotations', [PaperAnnotationController::class, 'store'])->name('annotations.store');
-    Route::delete('/papers/{researchPaper}/annotations/{annotation}', [PaperAnnotationController::class, 'destroy'])->name('annotations.destroy');
 
-    // Nave Routes
+    // Comment routes
+    Route::get('/papers/{researchPaper}/comments', [PaperCommentController::class, 'index'])->name('comments.index');
+    Route::post('/papers/{researchPaper}/comments', [PaperCommentController::class, 'store'])->name('comments.store');
+    Route::delete('/papers/{researchPaper}/comments/{comment}', [PaperCommentController::class, 'destroy'])->name('comments.destroy');
+        
+    // Nav Routes
    Route::get('/groups', function () {$groups = auth()->user()->groups ?? collect(); return view('groupstab', compact('groups')); })->name('groups');
 
 });

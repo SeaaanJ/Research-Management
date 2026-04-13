@@ -34,9 +34,8 @@ class ResearchPaper extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // ✅ Add this
-    public function annotations()
-    {
-        return $this->hasMany(PaperAnnotation::class, 'paper_id');
-    }
+   public function comments()
+{
+    return $this->hasMany(PaperComment::class, 'research_paper_id');
+}
 }
