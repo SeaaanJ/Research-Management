@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\PaperCommentController;
+use App\Http\Controllers\ExploreController;
 
 
 Route::get('/', function () {
@@ -64,6 +65,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/papers/{researchPaper}/comments', [PaperCommentController::class, 'index'])->name('comments.index');
     Route::post('/papers/{researchPaper}/comments', [PaperCommentController::class, 'store'])->name('comments.store');
     Route::delete('/papers/{researchPaper}/comments/{comment}', [PaperCommentController::class, 'destroy'])->name('comments.destroy');
+
+    // Explore routes
+        Route::get('/explore', [ExploreController::class, 'index'])->name('explore');
+        Route::get('/explore/search', [ExploreController::class, 'search'])->name('explore.search');
         
     // Nav Routes
    Route::get('/groups', function () {$groups = auth()->user()->groups ?? collect(); return view('groupstab', compact('groups')); })->name('groups');

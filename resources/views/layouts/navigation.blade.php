@@ -34,13 +34,13 @@
                 </a>
 
                 {{-- Explore --}}
-                <a href="#"
+                <a href="{{ route('explore') }}" :active="request()->routeIs('explore')"
                    class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 16 16">
                         <circle cx="8" cy="8" r="6"/>
                         <path stroke-linejoin="round" d="M10.5 5.5l-2 3-3 2 2-3z"/>
                     </svg>
-                    Explore
+                    Discover
                 </a>
             </div>
 
