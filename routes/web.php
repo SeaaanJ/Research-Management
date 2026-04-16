@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\PaperCommentController;
 use App\Http\Controllers\ExploreController;
+use App\Http\Controllers\DashboardController;
 
 
 Route::get('/', function () {
@@ -48,6 +49,9 @@ Route::middleware('auth')->group(function () {
     //  Invite response routes
     Route::post('/invites/{invite}/accept', [GroupController::class, 'acceptInvite'])->name('invites.accept');
     Route::post('/invites/{invite}/decline', [GroupController::class, 'declineInvite'])->name('invites.decline');
+
+    //Dashboard route
+    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
     // Paper routes
     Route::get('/groups/{group}', [ResearchPaperController::class, 'show'])->name('groups.show');

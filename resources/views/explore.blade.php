@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Discover Research Papers
+                Discover Open Access Research Papers
             </h2>
             <span class="text-xs text-gray-400">Powered by OpenAlex</span>
         </div>
