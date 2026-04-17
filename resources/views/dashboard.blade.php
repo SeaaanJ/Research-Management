@@ -82,12 +82,14 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
                     <p class="text-xs text-gray-400 uppercase font-semibold">Groups</p>
-                    <p class="text-3xl font-extrabold text-indigo-600 mt-1">{{ $groups->count() }}</p>
+                    <p class="text-3xl font-extrabold text-indigo-600 mt-1">
+                        {{ $groups->count() }}
+                    </p>
                 </div>
                 <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
                     <p class="text-xs text-gray-400 uppercase font-semibold">Published</p>
                     <p class="text-3xl font-extrabold text-green-600 mt-1">
-                        {{ $groups->sum(fn($g) => $g->papers()->where('published', true)->count()) }}
+                        {{ $publishedPapers->count() }}
                     </p>
                 </div>
                 <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
@@ -98,171 +100,188 @@
                 </div>
                 <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
                     <p class="text-xs text-gray-400 uppercase font-semibold">Pending Invites</p>
-                    <p class="text-3xl font-extrabold text-gray-900 mt-1">{{ $pendingInvites->count() }}</p>
+                    <p class="text-3xl font-extrabold text-gray-900 mt-1">
+                        {{ $pendingInvites->count() }}
+                    </p>
                 </div>
             </div>
 
             {{-- ===== MAIN CONTENT ROW ===== --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                {{-- ===== LEFT — GROUPS ===== --}}
-                <div class="lg:col-span-2 space-y-6">
+                {{-- ===== LEFT — PUBLISHED PAPERS ===== --}}
+                <div class="lg:col-span-2 space-y-4">
 
-                    {{-- Groups Grid --}}
-                    <div class="space-y-4">
-                        <h3 class="text-base font-bold text-gray-900">Your Groups</h3>
-                        @forelse ($groups as $group)
-                            <div class="bg-white shadow-sm rounded-2xl p-5 border border-gray-100">
-                                <div class="flex justify-between items-start mb-4">
-                                    <div>
-                                        <h4 class="text-lg font-black text-gray-900">{{ $group->name }}</h4>
-                                        <p class="text-xs text-gray-400">ID: #{{ $group->id }}</p>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <a href="{{ route('groups.show', $group) }}"
-                                           class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition">
-                                            View
-                                        </a>
-                                        @if($group->user_id === auth()->id())
-                                            <button onclick="openDeleteModal({{ $group->id }}, '{{ $group->name }}')"
-                                                    class="bg-red-100 text-red-600 text-xs px-3 py-1.5 rounded-lg hover:bg-red-200 transition">
-                                                Delete
-                                            </button>
-                                        @endif
-                                    </div>
-                                </div>
-
-                                {{-- Invite --}}
-                                <div class="pt-3 border-t border-gray-100">
-                                    <form action="{{ route('groups.invite', $group) }}" method="POST">
-                                        @csrf
-                                        <label class="text-xs font-semibold text-gray-400 uppercase">
-                                            Send Invite by User ID
-                                        </label>
-                                        <div class="flex gap-2 mt-1">
-                                            <x-text-input name="user_id" type="number"
-                                                          placeholder="Enter user ID..."
-                                                          class="flex-1 text-sm" required />
-                                            <button class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-indigo-700">
-                                                Send
-                                            </button>
-                                        </div>
-                                    </form>
-
-                                    {{-- Pending sent invites --}}
-                                    @php $sentInvites = $group->invites->where('status', 'pending'); @endphp
-                                    @if($sentInvites->count() > 0)
-                                        <div class="mt-2 flex flex-wrap gap-1">
-                                            @foreach($sentInvites as $sent)
-                                                <span class="text-xs bg-yellow-50 border border-yellow-200 text-yellow-700 px-2 py-0.5 rounded-full">
-                                                    ID #{{ $sent->receiver_id }} — waiting
-                                                </span>
-                                            @endforeach
-                                        </div>
-                                    @endif
-                                </div>
-
-                                {{-- Members --}}
-                                <div class="mt-4 flex flex-wrap gap-2">
-                                    @foreach ($group->users as $member)
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
-                                            {{ $member->first_name }} {{ $member->last_name }}
-                                            @if($member->id === $group->user_id)
-                                                <span class="text-indigo-500">(Owner)</span>
-                                            @endif
-                                        </span>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @empty
-                            <div class="bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl p-12 text-center">
-                                <p class="text-gray-500">No groups yet.</p>
-                                <p class="text-gray-400 text-sm mt-1">Create one above to get started.</p>
-                            </div>
-                        @endforelse
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-base font-bold text-gray-900">Published Papers</h3>
+                        <a href="{{ route('groups') }}"
+                           class="text-sm text-indigo-600 hover:underline">
+                            View Groups
+                        </a>
                     </div>
+
+                    @if($publishedPapers->isEmpty())
+                        <div class="bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl p-12 text-center">
+                            <p class="text-gray-500 font-medium">No published papers yet.</p>
+                            <p class="text-gray-400 text-sm mt-1">
+                                Go to your groups and publish a paper to see it here.
+                            </p>
+                            <a href="{{ route('groups') }}"
+                               class="inline-block mt-4 bg-indigo-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+                                Go to Groups
+                            </a>
+                        </div>
+                    @else
+                        <div class="space-y-4">
+                            @foreach($publishedPapers as $paper)
+                                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition">
+                                    <div class="flex items-start gap-4">
+
+                                        {{-- File Icon --}}
+                                        <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-xl shrink-0">
+                                            {{ $paper->file_type === 'pdf' ? '📄' : '📝' }}
+                                        </div>
+
+                                        {{-- Paper Info --}}
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2 flex-wrap mb-1">
+                                                <span class="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                                                    Published
+                                                </span>
+                                                @if($paper->topic)
+                                                    <span class="bg-indigo-50 text-indigo-600 text-xs font-medium px-2 py-0.5 rounded-full border border-indigo-200">
+                                                        {{ $paper->topic }}
+                                                    </span>
+                                                @endif
+                                                <span class="text-xs text-gray-400 uppercase font-mono">
+                                                    {{ $paper->file_type }}
+                                                </span>
+                                            </div>
+
+                                            <h4 class="font-bold text-gray-900 text-base leading-snug truncate">
+                                                {{ $paper->title }}
+                                            </h4>
+
+                                            @if($paper->description)
+                                                <p class="text-sm text-gray-500 mt-0.5 line-clamp-2">
+                                                    {{ $paper->description }}
+                                                </p>
+                                            @endif
+
+                                            <div class="flex items-center gap-3 mt-2 flex-wrap">
+                                                <span class="text-xs text-gray-400">
+                                                    By {{ $paper->uploader->first_name }} {{ $paper->uploader->last_name }}
+                                                </span>
+                                                <span class="text-xs text-gray-300">·</span>
+                                                <span class="text-xs text-indigo-500 font-medium">
+                                                    {{ $paper->group->name }}
+                                                </span>
+                                                <span class="text-xs text-gray-300">·</span>
+                                                <span class="text-xs text-gray-400">
+                                                    {{ $paper->published_at?->diffForHumans() }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {{-- Actions --}}
+                                        <div class="flex flex-col gap-2 shrink-0">
+                                            <a href="{{ route('groups.show', $paper->group_id) }}"
+                                               class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition text-center">
+                                                View
+                                            </a>
+                                            <a href="{{ route('papers.download', $paper) }}"
+                                               class="bg-gray-100 text-gray-600 text-xs px-3 py-1.5 rounded-lg hover:bg-gray-200 transition text-center">
+                                                Download
+                                            </a>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
 
                 </div>
                 {{-- ===== END LEFT ===== --}}
 
-                {{-- ===== RIGHT SIDEBAR — COMBINED TABS ===== --}}
-                <div>
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-6">
- 
-                        {{-- Tab Headers --}}
-                        <div class="flex border-b border-gray-100">
-                            <button onclick="switchTab('published')" id="tab-published"
-                                    class="flex-1 py-3 text-xs font-bold uppercase tracking-wide text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50 transition">
-                                📄 Recent
-                            </button>
-                            <button onclick="switchTab('activity')" id="tab-activity"
-                                    class="flex-1 py-3 text-xs font-bold uppercase tracking-wide text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition">
-                                💬 Activity
-                            </button>
-                        </div>
- 
-                        {{-- Recently Published Panel --}}
-                        <div id="panel-published" class="p-5">
-                            @if($recentPublished->isEmpty())
-                                <p class="text-xs text-gray-400 text-center py-6">No published papers yet.</p>
-                            @else
-                                <div class="space-y-3 max-h-[520px] overflow-y-auto pr-1">
-                                    @foreach($recentPublished as $paper)
-                                        <a href="{{ route('groups.show', $paper->group_id) }}"
-                                           class="block hover:bg-gray-50 rounded-lg p-2 -mx-2 transition">
-                                            <div class="flex items-start gap-3">
-                                                <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center text-sm shrink-0">
-                                                    {{ ($paper->file_type ?? '') === 'pdf' ? '📄' : '📝' }}
-                                                </div>
-                                                <div class="flex-1 min-w-0">
-                                                    <p class="text-sm font-semibold text-gray-900 truncate">
-                                                        {{ $paper->title }}
-                                                    </p>
-                                                    <p class="text-xs text-gray-400 mt-0.5">
-                                                        {{ $paper->group->name }}
-                                                        · {{ $paper->published_at?->diffForHumans() }}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    @endforeach
-                                </div>
-                            @endif
-                        </div>
- 
-                        {{-- Recent Activity Panel --}}
-                        <div id="panel-activity" class="p-5 hidden">
-                            @if($recentActivity->isEmpty())
-                                <p class="text-xs text-gray-400 text-center py-6">No recent activity.</p>
-                            @else
-                                <div class="space-y-3 max-h-[520px] overflow-y-auto pr-1">
-                                    @foreach($recentActivity as $activity)
-                                        <a href="{{ route('groups.show', $activity['group_id']) }}"
-                                           class="flex items-start gap-3 hover:bg-gray-50 rounded-lg p-2 -mx-2 transition">
-                                            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs shrink-0 mt-0.5
-                                                {{ $activity['type'] === 'upload' ? 'bg-indigo-100 text-indigo-600' : 'bg-yellow-100 text-yellow-600' }}">
-                                                {{ $activity['type'] === 'upload' ? '↑' : '💬' }}
-                                            </div>
-                                            <div class="flex-1 min-w-0">
-                                                <p class="text-xs font-semibold text-gray-700">
-                                                    {{ $activity['message'] }}
-                                                </p>
-                                                <p class="text-xs text-gray-500 truncate">
-                                                    {{ $activity['detail'] }}
-                                                </p>
-                                                <p class="text-xs text-gray-400 mt-0.5">
-                                                    {{ $activity['group'] }}
-                                                    · {{ \Carbon\Carbon::parse($activity['time'])->diffForHumans() }}
-                                                </p>
-                                            </div>
-                                        </a>
-                                    @endforeach
-                                </div>
-                            @endif
-                        </div>
- 
+                {{-- ===== RIGHT SIDEBAR ===== --}}
+                <div class="space-y-6">
+
+                    {{-- Recent Activity --}}
+                    <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
+                        <h3 class="text-sm font-bold text-gray-400 uppercase mb-4">
+                            Recent Activity
+                        </h3>
+                        @if($recentActivity->isEmpty())
+                            <p class="text-xs text-gray-400 text-center py-4">
+                                No recent activity.
+                            </p>
+                        @else
+                            <div class="space-y-3 max-h-80 overflow-y-auto pr-1">
+                                @foreach($recentActivity as $activity)
+                                    <a href="{{ route('groups.show', $activity['group_id']) }}"
+                                       class="flex items-start gap-3 hover:bg-gray-50 rounded-lg p-2 -mx-2 transition">
+                                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5
+                                            {{ $activity['type'] === 'upload' ? 'bg-indigo-100 text-indigo-600' : 'bg-yellow-100 text-yellow-600' }}">
+                                            {{ $activity['type'] === 'upload' ? '↑' : 'C' }}
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-xs font-semibold text-gray-700">
+                                                {{ $activity['message'] }}
+                                            </p>
+                                            <p class="text-xs text-gray-500 truncate">
+                                                {{ $activity['detail'] }}
+                                            </p>
+                                            <p class="text-xs text-gray-400 mt-0.5">
+                                                {{ $activity['group'] }}
+                                                · {{ \Carbon\Carbon::parse($activity['time'])->diffForHumans() }}
+                                            </p>
+                                        </div>
+                                    </a>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
+
+                    {{-- Quick Links --}}
+                    <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
+                        <h3 class="text-sm font-bold text-gray-400 uppercase mb-4">Quick Links</h3>
+                        <div class="space-y-2">
+                            <a href="{{ route('groups') }}"
+                               class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition">
+                                <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 text-sm font-bold">
+                                    G
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-700">My Groups</p>
+                                    <p class="text-xs text-gray-400">{{ $groups->count() }} groups</p>
+                                </div>
+                            </a>
+                            <a href="{{ route('explore') }}"
+                               class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition">
+                                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-green-600 text-sm font-bold">
+                                    E
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-700">Explore Research</p>
+                                    <p class="text-xs text-gray-400">Discover papers worldwide</p>
+                                </div>
+                            </a>
+                            <a href="{{ route('profile.edit') }}"
+                               class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition">
+                                <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 text-sm font-bold">
+                                    P
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-700">Profile</p>
+                                    <p class="text-xs text-gray-400">Edit your details</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
                 </div>
+                {{-- ===== END RIGHT ===== --}}
 
             </div>
 
@@ -272,7 +291,7 @@
                     <div>
                         <h3 class="text-xl font-black text-gray-900">Discover Research</h3>
                         <p class="text-sm text-gray-400 mt-0.5">
-                            Latest published papers from the research community
+                            Open access papers from the research community
                         </p>
                     </div>
                     <a href="{{ route('explore') }}"
@@ -284,7 +303,6 @@
                 {{-- Discovery Grid --}}
                 <div id="discoveryFeed"
                      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {{-- Skeleton loaders --}}
                     @for($i = 0; $i < 6; $i++)
                         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3 animate-pulse">
                             <div class="h-3 bg-gray-200 rounded w-1/3"></div>
@@ -300,7 +318,6 @@
                     @endfor
                 </div>
 
-                {{-- Load More --}}
                 <div class="text-center mt-6">
                     <button id="loadMoreBtn"
                             onclick="loadMoreDiscovery()"
@@ -332,7 +349,6 @@
                     <p id="confirmStringDisplay"
                        class="text-2xl font-mono font-black text-red-600 tracking-widest transition-opacity duration-200">
                     </p>
-                    {{-- Progress bar --}}
                     <div class="mt-2 h-1 bg-gray-200 rounded-full overflow-hidden">
                         <div id="stringProgress"
                              class="h-full bg-indigo-500 transition-all duration-100"
@@ -395,9 +411,8 @@
     </div>
     {{-- ===== END DELETE MODAL ===== --}}
 
-    {{-- Discovery Feed Script --}}
     <script>
-        let discoveryPage = 1;
+        let discoveryPage   = 1;
         let discoveryLoading = false;
 
         const TOPICS = [
@@ -431,7 +446,6 @@
 
         function renderDiscoveryCards(papers, append = false) {
             const feed = document.getElementById('discoveryFeed');
-
             if (!append) feed.innerHTML = '';
 
             papers.slice(0, 6).forEach(paper => {
@@ -453,29 +467,19 @@
                             : ''
                         }
                     </div>
-
                     <h4 class="font-bold text-gray-900 text-sm leading-snug line-clamp-2 flex-1">
                         ${paper.title}
                     </h4>
-
                     <p class="text-xs text-gray-500 font-medium truncate">${paper.authors}</p>
-
                     ${paper.journal
                         ? `<p class="text-xs text-indigo-500 italic truncate">${paper.journal}</p>`
                         : ''
                     }
-
-                    <p class="text-xs text-gray-500 leading-relaxed line-clamp-3">
-                        ${paper.abstract}
-                    </p>
-
+                    <p class="text-xs text-gray-500 leading-relaxed line-clamp-3">${paper.abstract}</p>
                     <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-gray-50">
                         <div class="flex flex-wrap gap-1">${topicBadges}</div>
-                        <span class="text-xs text-gray-400">
-                            ${paper.cited_by.toLocaleString()} citations
-                        </span>
+                        <span class="text-xs text-gray-400">${paper.cited_by.toLocaleString()} citations</span>
                     </div>
-
                     ${paper.url
                         ? `<a href="${paper.url}" target="_blank"
                                class="block w-full text-center bg-indigo-600 text-white text-xs font-semibold py-2 rounded-lg hover:bg-indigo-700 transition mt-1">
@@ -495,27 +499,9 @@
             loadDiscovery(discoveryPage, true);
         }
 
-        // Load discovery feed on page load
         document.addEventListener('DOMContentLoaded', () => {
             loadDiscovery(1, false);
         });
-
-
-
-        function switchTab(tab) {
-            const tabs = ['published', 'activity'];
-            tabs.forEach(t => {
-                const btn   = document.getElementById('tab-' + t);
-                const panel = document.getElementById('panel-' + t);
-                if (t === tab) {
-                    btn.className   = 'flex-1 py-3 text-xs font-bold uppercase tracking-wide text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50 transition';
-                    panel.classList.remove('hidden');
-                } else {
-                    btn.className   = 'flex-1 py-3 text-xs font-bold uppercase tracking-wide text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition';
-                    panel.classList.add('hidden');
-                }
-            });
-        }
     </script>
 
 </x-app-layout>

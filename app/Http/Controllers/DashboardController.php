@@ -14,27 +14,29 @@ class DashboardController extends Controller
         $user   = Auth::user();
         $groups = $user->groups()->with(['users', 'invites'])->get() ?? collect();
 
-        // Recently published papers from user's groups
-        $recentPublished = ResearchPaper::whereIn('group_id', $groups->pluck('id'))
+        // Published papers from user's groups
+        $publishedPapers = ResearchPaper::whereIn('group_id', $groups->pluck('id'))
             ->where('published', true)
             ->with(['uploader', 'group'])
             ->latest('published_at')
-            ->take(5)
             ->get();
 
-        // Recent activity — recent uploads and comments across user's groups
+        // Recently published — for sidebar
+        $recentPublished = $publishedPapers->take(5);
+
+        // Recent activity
         $recentUploads = ResearchPaper::whereIn('group_id', $groups->pluck('id'))
             ->with(['uploader', 'group'])
             ->latest()
             ->take(5)
             ->get()
             ->map(fn($p) => [
-                'type'       => 'upload',
-                'message'    => "{$p->uploader->first_name} {$p->uploader->last_name} uploaded a paper",
-                'detail'     => $p->title,
-                'group'      => $p->group->name,
-                'time'       => $p->created_at,
-                'group_id'   => $p->group_id,
+                'type'     => 'upload',
+                'message'  => "{$p->uploader->first_name} {$p->uploader->last_name} uploaded a paper",
+                'detail'   => $p->title,
+                'group'    => $p->group->name,
+                'time'     => $p->created_at,
+                'group_id' => $p->group_id,
             ]);
 
         $recentComments = PaperComment::whereHas('paper', fn($q) =>
@@ -45,25 +47,24 @@ class DashboardController extends Controller
             ->take(5)
             ->get()
             ->map(fn($c) => [
-                'type'       => 'comment',
-                'message'    => "{$c->user->first_name} {$c->user->last_name} commented on a paper",
-                'detail'     => $c->paper->title,
-                'group'      => $c->paper->group->name,
-                'time'       => $c->created_at,
-                'group_id'   => $c->paper->group_id,
+                'type'     => 'comment',
+                'message'  => "{$c->user->first_name} {$c->user->last_name} commented on a paper",
+                'detail'   => $c->paper->title,
+                'group'    => $c->paper->group->name,
+                'time'     => $c->created_at,
+                'group_id' => $c->paper->group_id,
             ]);
 
-        // Merge and sort activity by time
         $recentActivity = $recentUploads->concat($recentComments)
             ->sortByDesc('time')
             ->take(10)
             ->values();
 
-        // Pending invites
         $pendingInvites = $user->pendingInvites()->get();
 
         return view('dashboard', compact(
             'groups',
+            'publishedPapers',
             'recentPublished',
             'recentActivity',
             'pendingInvites'
