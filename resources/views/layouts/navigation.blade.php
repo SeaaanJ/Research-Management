@@ -114,6 +114,35 @@
                     </div>
                 </div>
 
+
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+
+    @if(Auth::user()->isUser())
+        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+            Dashboard
+        </x-nav-link>
+        <x-nav-link :href="route('groups')" :active="request()->routeIs('groups')">
+            Groups
+        </x-nav-link>
+        <x-nav-link :href="route('explore')" :active="request()->routeIs('explore')">
+            Explore
+        </x-nav-link>
+    @endif
+
+    @if(Auth::user()->isAdmin())
+        <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
+            Admin Dashboard
+        </x-nav-link>
+    @endif
+
+    @if(Auth::user()->isSuperAdmin())
+        <x-nav-link :href="route('super-admin.dashboard')" :active="request()->routeIs('super-admin.dashboard')">
+            Super Admin Dashboard
+        </x-nav-link>
+    @endif
+
+</div>
+
                 {{-- User Dropdown --}}
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">

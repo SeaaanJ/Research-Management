@@ -10,15 +10,28 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\PaperCommentController;
 use App\Http\Controllers\ExploreController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\SuperAdminDashboardController;   
 
 
 Route::get('/', function () {
     return view('landing');
 })->name('home');
 
-Route::get('/dashboard', [GroupController::class, 'index'])
-    ->middleware(['auth', 'verified'])
+// User Dashboard
+Route::middleware(['auth', 'verified', 'role:user'])
+    ->get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
+
+// Admin Dashboard
+Route::middleware(['auth', 'verified', 'role:admin'])
+    ->get('/admin/dashboard', [AdminDashboardController::class, 'index'])
+    ->name('admin.dashboard');
+
+// Super Admin Dashboard
+Route::middleware(['auth', 'verified', 'role:super_admin'])
+    ->get('/super-admin/dashboard', [SuperAdminDashboardController::class, 'index'])
+    ->name('super-admin.dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

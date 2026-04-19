@@ -25,6 +25,7 @@ class User extends Authenticatable
         'institution',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -49,7 +50,20 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function isUser()
+    {
+        return $this->role === 'user';
+    }
 
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isSuperAdmin()
+    {
+        return $this->role === 'super_admin';
+    }
 
     public function groups()
 {
