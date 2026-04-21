@@ -24,6 +24,46 @@
     </div>
 </div>
 
+
+//ban Session alert
+@if(session('banned'))
+    <div class="mb-4 bg-red-50 border-2 border-red-200 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+            <div class="text-3xl"></div>
+            <div class="flex-1">
+                <h3 class="text-lg font-bold text-red-900 mb-1">
+                    Account {{ session('banned')['type'] === 'permanent' ? 'Permanently' : 'Temporarily' }} Banned
+                </h3>
+
+                <p class="text-sm text-red-700 mb-3">
+                    <strong>Reason:</strong> {{ session('banned')['reason'] }}
+                </p>
+
+                @if(session('banned')['type'] === 'temporary')
+                    <div class="bg-red-100 border border-red-300 rounded-lg p-3">
+                        <p class="text-xs text-red-600">
+                            <strong>Ban Duration:</strong> {{ session('banned')['remaining'] }} remaining
+                        </p>
+                        <p class="text-xs text-red-600 mt-1">
+                            <strong>Expires:</strong> {{ \Carbon\Carbon::parse(session('banned')['banned_until'])->format('F j, Y g:i A') }}
+                        </p>
+                    </div>
+                @else
+                    <div class="bg-red-100 border border-red-300 rounded-lg p-3">
+                        <p class="text-xs text-red-600 font-semibold">
+                            This ban is permanent. Please contact support if you believe this is an error.
+                        </p>
+                    </div>
+                @endif
+
+                <p class="text-xs text-red-500 mt-3">
+                    If you believe this ban was issued in error, please contact the platform administrator.
+                </p>
+            </div>
+        </div>
+    </div>
+@endif
+
         {{-- Right Side — Form --}}
         <div class="w-full md:w-1/2 p-10 flex flex-col justify-center">
 

@@ -91,5 +91,28 @@ class User extends Authenticatable
 
     }
 
+
+    public function bans()
+{
+    return $this->hasMany(UserBan::class);
+}
+
+public function activeBan()
+{
+    return $this->hasOne(UserBan::class)
+        ->where('is_active', true)
+        ->where(function($q) {
+            $q->where('type', 'permanent')
+              ->orWhere('banned_until', '>', now());
+        })
+        ->latest();
+}
+
+public function isBanned()
+{
+    $ban = $this->activeBan;
+    return $ban && $ban->isActive();
+}
+
     
 }

@@ -117,7 +117,7 @@
 
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
 
-    @if(Auth::user()->isUser())
+    <!-- @if(Auth::user()->isUser())
         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
             Dashboard
         </x-nav-link>
@@ -141,7 +141,7 @@
         </x-nav-link>
     @endif
 
-</div>
+</div> -->
 
                 {{-- User Dropdown --}}
                 <x-dropdown align="right" width="48">

@@ -12,8 +12,9 @@ use App\Http\Controllers\ExploreController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\SuperAdminDashboardController;   
+use App\Http\Controllers\Admin\AdminBanController; 
 
-
+Route::middleware(['auth', 'verified', 'banned'])->group(function () {
 Route::get('/', function () {
     return view('landing');
 })->name('home');
@@ -22,6 +23,14 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified', 'role:user'])
     ->get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
+
+
+//Ban User Route
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    Route::post('/users/{user}/ban', [AdminBanController::class, 'store'])->name('admin.users.ban');
+    Route::delete('/users/{user}/ban', [AdminBanController::class, 'destroy'])->name('admin.users.unban');
+});
 
 // Admin Dashboard
 Route::middleware(['auth', 'verified', 'role:admin'])
@@ -77,7 +86,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/groups/{group}/unpublish-all', [ResearchPaperController::class, 'unpublishAll'])->name('papers.unpublishAll');  // UnPublish all, Visible to Group Owner, Adviser and Admins only
 
 
-
     // Comment routes
     Route::get('/papers/{researchPaper}/comments', [PaperCommentController::class, 'index'])->name('comments.index');
     Route::post('/papers/{researchPaper}/comments', [PaperCommentController::class, 'store'])->name('comments.store');
@@ -89,6 +97,8 @@ Route::middleware('auth')->group(function () {
         
     // Nav Routes
    Route::get('/groups', function () {$groups = auth()->user()->groups ?? collect(); return view('groupstab', compact('groups')); })->name('groups');
+
+});
 
 });
 

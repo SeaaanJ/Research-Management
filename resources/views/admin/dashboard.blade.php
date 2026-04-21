@@ -122,13 +122,29 @@
 
                                         {{-- Actions --}}
                                         <div class="flex flex-col gap-2 shrink-0">
-                                            <button class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition">
-                                                View Details
-                                            </button>
-                                            <button class="bg-gray-100 text-gray-600 text-xs px-3 py-1.5 rounded-lg hover:bg-gray-200 transition">
-                                                Manage
-                                            </button>
-                                        </div>
+    @if($user->activeBan)
+        {{-- User is banned --}}
+        <div class="bg-red-50 border border-red-200 rounded-lg p-2 text-center">
+            <p class="text-xs font-bold text-red-700 uppercase">Banned</p>
+            <p class="text-xs text-red-600 mt-0.5">
+                {{ $user->activeBan->type === 'permanent' ? 'Permanent' : $user->activeBan->getRemainingTime() }}
+            </p>
+        </div>
+        <button onclick="unbanUser({{ $user->id }}, '{{ $user->first_name }} {{ $user->last_name }}')"
+                class="bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-green-700 transition font-semibold">
+            Unban User
+        </button>
+    @else
+        {{-- User is not banned --}}
+        <button onclick="openBanModal({{ $user->id }}, '{{ $user->first_name }} {{ $user->last_name }}')"
+                class="bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-red-700 transition font-semibold">
+            Ban User
+        </button>
+    @endif
+    <button class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition">
+        View Details
+    </button>
+</div>
 
                                     </div>
                                 </div>
@@ -226,4 +242,175 @@
 
         </div>
     </div>
+
+
+{{-- Ban User Modal --}}
+<div id="banModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeBanModal()"></div>
+    <div class="relative flex items-center justify-center min-h-screen px-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 z-10 space-y-5">
+            <div class="text-center">
+                <div class="text-4xl mb-2">🚫</div>
+                <h3 class="text-xl font-black text-gray-900">Ban User</h3>
+                <p class="text-sm text-gray-500 mt-1">
+                    You are about to ban
+                    <span id="banUserName" class="font-bold text-red-600"></span>
+                </p>
+            </div>
+
+            <div id="banError" class="hidden bg-red-50 border border-red-300 text-red-700 text-sm px-4 py-3 rounded-xl">
+                <span id="banErrorText"></span>
+            </div>
+
+            <form id="banForm">
+                {{-- Ban Type --}}
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Ban Type</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-3 p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                            <input type="radio" name="type" value="temporary" checked
+                                   onchange="document.getElementById('durationSection').classList.remove('hidden')"
+                                   class="w-4 h-4 text-indigo-600">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900">Temporary Ban</p>
+                                <p class="text-xs text-gray-500">Ban for a specific duration</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                            <input type="radio" name="type" value="permanent"
+                                   onchange="document.getElementById('durationSection').classList.add('hidden')"
+                                   class="w-4 h-4 text-red-600">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900">Permanent Ban</p>
+                                <p class="text-xs text-gray-500">Ban indefinitely</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                {{-- Duration --}}
+                <div id="durationSection" class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Duration</label>
+                    <select name="duration"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 bg-white">
+                        <option value="1_day">1 Day</option>
+                        <option value="1_week">1 Week</option>
+                        <option value="1_month">1 Month</option>
+                    </select>
+                </div>
+
+                {{-- Reason --}}
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+                    <textarea name="reason" rows="3" required
+                              placeholder="Explain why this user is being banned..."
+                              class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"></textarea>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeBanModal()"
+                            class="flex-1 bg-gray-100 text-gray-700 py-2 rounded-xl hover:bg-gray-200 transition font-medium text-sm">
+                        Cancel
+                    </button>
+                    <button type="submit" id="banSubmitBtn"
+                            class="flex-1 bg-red-600 text-white py-2 rounded-xl hover:bg-red-700 transition font-bold text-sm">
+                        Ban User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentBanUserId = null;
+
+    function openBanModal(userId, userName) {
+        currentBanUserId = userId;
+        document.getElementById('banUserName').textContent = userName;
+        document.getElementById('banModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        document.getElementById('banError').classList.add('hidden');
+        document.getElementById('banForm').reset();
+        document.getElementById('durationSection').classList.remove('hidden');
+    }
+
+    function closeBanModal() {
+        document.getElementById('banModal').classList.add('hidden');
+        document.body.style.overflow = '';
+        currentBanUserId = null;
+    }
+
+    document.getElementById('banForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const btn = document.getElementById('banSubmitBtn');
+        btn.textContent = 'Banning...';
+        btn.disabled = true;
+
+        const formData = new FormData(e.target);
+
+        try {
+            const res = await fetch(`/admin/users/${currentBanUserId}/ban`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: formData.get('type'),
+                    duration: formData.get('duration'),
+                    reason: formData.get('reason'),
+                }),
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                closeBanModal();
+                window.location.reload();
+            } else {
+                document.getElementById('banError').classList.remove('hidden');
+                document.getElementById('banErrorText').textContent = data.message;
+            }
+        } catch (e) {
+            document.getElementById('banError').classList.remove('hidden');
+            document.getElementById('banErrorText').textContent = 'Failed to ban user. Please try again.';
+        } finally {
+            btn.textContent = 'Ban User';
+            btn.disabled = false;
+        }
+    });
+
+    async function unbanUser(userId, userName) {
+        if (!confirm(`Remove ban from ${userName}?`)) return;
+
+        try {
+            const res = await fetch(`/admin/users/${userId}/ban`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || 'Failed to unban user.');
+            }
+        } catch (e) {
+            alert('Failed to unban user. Please try again.');
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeBanModal();
+    });
+</script>
+
+
 </x-app-layout>

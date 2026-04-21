@@ -14,6 +14,15 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
+
+     $users = User::where('role', 'user')
+        ->with('activeBan.banner')
+        ->withCount([
+            'groups',
+            'receivedInvites' => fn($q) => $q->where('status', 'pending')
+        ])
+        ->latest()
+        ->get();
         // All users
         $users = User::where('role', 'user')
             ->withCount(['groups', 'receivedInvites' => fn($q) => $q->where('status', 'pending')])

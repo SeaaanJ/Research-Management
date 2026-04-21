@@ -3,7 +3,8 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use App\Http\Middleware\CheckRole; // ✅ Add this import
+use App\Http\Middleware\CheckRole; 
+use App\Http\Middleware\CheckBanned;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -13,9 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'role' => CheckRole::class, // ✅ Add this
+            'role' => CheckRole::class, 
+            'banned' => CheckBanned::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
+
+    
