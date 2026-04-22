@@ -1,59 +1,68 @@
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+<a href="#"><img src="https://img.shields.io/badge/Subject-IT9A-red" alt="IT9A Subject"></a>
+<a href="#"><img src="https://img.shields.io/badge/API-OpenAlex-blue" alt="OpenAlex API"></a>
+<a href="#"><img src="https://img.shields.io/badge/Stack-Laravel_Breeze_%2B_React-4dc71f" alt="Stack"></a>
+<a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License"></a>
 </p>
 
-## About Laravel
+About Research Management Software
+This application is a specialized research discovery and organization platform developed strictly for the IT9A college course. It leverages the power of the OpenAlex API to fetch global academic data while providing a local ecosystem for students and researchers to collaborate.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+We have combined the security of Laravel Breeze with the interactivity of React to create a seamless research experience. Key features included in this project:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+OpenAlex Integration: Fetch and display high-quality metadata from the OpenAlex global index.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Group Collaboration: Create research groups, invite colleagues, and manage collective projects.
 
-## Learning Laravel
+Internal Publishing: A dedicated dashboard to view papers published specifically within the app.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+In-App Reader: Seamlessly read PDF research papers using the pdfjs-dist library integration.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+File Management: Functionality to add new papers and download them for offline use.
 
-## Laravel Sponsors
+Group Control: Full CRUD operations for group management, including the ability to delete groups and manage invitations.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+API Reference
+The system provides a localized API for managing internal items and integrating with external data sources.
 
-### Premium Partners
+Get all items
+HTTP
+GET /api/items?api_key={your_key}
+Get specific item
+HTTP
+GET /api/items/${id}
+Utility Functions
+For the mathematical and logic requirements of the IT9A curriculum, the system includes native utility functions:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+add(num1, num2)
+The add function takes two numbers and returns the sum. This is used for internal data calculation and reporting metrics.
 
-## Contributing
+Technical Implementation
+This project is built using a modern full-stack approach:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Authentication: Scaffolding provided by Laravel Breeze.
 
-## Code of Conduct
+Frontend: React components for a dynamic user interface.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+PDF Handling: PDF.js for rendering documents directly in the browser.
 
-## Security Vulnerabilities
+Data Source: OpenAlex API for academic entity retrieval.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Installation
+Clone the repository and enter the directory.
 
-## License
+Run composer install and npm install.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Configure your .env file (Database and OpenAlex credentials).
+
+Run php artisan migrate.
+
+Start the development environment with php artisan serve and npm run dev.
+
+IT9A Project Notice
+This software is submitted as a requirement for the IT9A subject. It is designed to demonstrate proficiency in backend framework management, API consumption, and frontend state management.
+
+License
+This IT9A project is open-sourced software licensed under the MIT license.
