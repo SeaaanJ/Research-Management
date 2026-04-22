@@ -56,13 +56,49 @@
     <x-text-input id="middle_name" class="block mt-1 w-full" type="text" name="middle_name" />
 </div>
 
-<div class="mt-4">
+<div class="mt-4 relative" x-data="{ 
+    open: false, 
+    results: [],
+    async fetchSchools() {
+        if (this.search.length < 3) { this.results = []; return; }
+        const response = await fetch(`http://universities.hipolabs.com/search?name=${this.search}`);
+        const data = await response.json();
+        this.results = [...new Set(data.map(item => item.name))].slice(0, 8);
+    }
+}">
     <x-input-label for="institution" :value="__('School / Institution')" />
-    <x-text-input id="institution" class="block mt-1 w-full" type="text" name="institution" required />
+    
+    <div class="relative mt-1">
+        <x-text-input 
+            id="institution" 
+            name="institution"
+            class="block w-full" 
+            type="text" 
+            x-model="search"
+            @input.debounce.300ms="fetchSchools(); open = true"
+            @click="open = true"
+            @click.away="open = false"
+            placeholder="Institution name (e.g. University of Mindanao)"
+            required 
+        />
+
+        <div x-show="open && results.length > 0" 
+             class="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-y-auto"
+             x-transition>
+            <template x-for="school in results" :key="school">
+                <button type="button"
+                        @click="search = school; open = false"
+                        class="w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors border-b border-gray-50 last:border-0">
+                    <span x-text="school"></span>
+                </button>
+            </template>
+        </div>
+    </div>
 </div>
 
                     <!-- Email -->
-                    <div class="mb-4">
+                    <div class="mb-4 mt-4">
+                        <x-input-label for="email" :value="__('Email')" />
                         <x-text-input id="email"
                             class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
                             type="email" name="email" :value="old('email')" required
@@ -72,6 +108,7 @@
 
                     <!-- Password -->
                     <div class="mb-4">
+                        <x-input-label for="password" :value="__('Password')" />
                         <x-text-input id="password"
                             class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
                             type="password" name="password" required
@@ -81,6 +118,7 @@
 
                     <!-- Confirm Password -->
                     <div class="mb-6">
+                        <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
                         <x-text-input id="password_confirmation"
                             class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
                             type="password" name="password_confirmation" required

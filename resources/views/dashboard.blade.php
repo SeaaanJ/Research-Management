@@ -208,40 +208,45 @@
                 <div class="space-y-6">
 
                     {{-- Recent Activity --}}
-                    <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
-                        <h3 class="text-sm font-bold text-gray-400 uppercase mb-4">
-                            Recent Activity
-                        </h3>
-                        @if($recentActivity->isEmpty())
-                            <p class="text-xs text-gray-400 text-center py-4">
-                                No recent activity.
-                            </p>
-                        @else
-                            <div class="space-y-3 max-h-80 overflow-y-auto pr-1">
-                                @foreach($recentActivity as $activity)
-                                    <a href="{{ route('groups.show', $activity['group_id']) }}"
-                                       class="flex items-start gap-3 hover:bg-gray-50 rounded-lg p-2 -mx-2 transition">
-                                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5
-                                            {{ $activity['type'] === 'upload' ? 'bg-indigo-100 text-indigo-600' : 'bg-yellow-100 text-yellow-600' }}">
-                                            {{ $activity['type'] === 'upload' ? '↑' : 'C' }}
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <p class="text-xs font-semibold text-gray-700">
-                                                {{ $activity['message'] }}
-                                            </p>
-                                            <p class="text-xs text-gray-500 truncate">
-                                                {{ $activity['detail'] }}
-                                            </p>
-                                            <p class="text-xs text-gray-400 mt-0.5">
-                                                {{ $activity['group'] }}
-                                                · {{ \Carbon\Carbon::parse($activity['time'])->diffForHumans() }}
-                                            </p>
-                                        </div>
-                                    </a>
-                                @endforeach
-                            </div>
-                        @endif
+<div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
+    <h3 class="text-sm font-bold text-gray-400 uppercase mb-4">
+        Recent Activity
+    </h3>
+    @if($recentActivity->isEmpty())
+        <p class="text-xs text-gray-400 text-center py-4">
+            No recent activity.
+        </p>
+    @else
+        <div class="space-y-3 max-h-80 overflow-y-auto pr-1">
+            @foreach($recentActivity as $activity)
+                <a href="{{ $activity['url'] }}"
+                   class="flex items-start gap-3 hover:bg-gray-50 rounded-lg p-2 -mx-2 transition cursor-pointer group">
+                    <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 transition group-hover:scale-110
+                        {{ $activity['type'] === 'upload' ? 'bg-indigo-100 text-indigo-600 group-hover:bg-indigo-200' : 'bg-yellow-100 text-yellow-600 group-hover:bg-yellow-200' }}">
+                        {{ $activity['type'] === 'upload' ? '↑' : 'C' }}
                     </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-semibold text-gray-700 group-hover:text-gray-900">
+                            {{ $activity['message'] }}
+                        </p>
+                        <p class="text-xs text-gray-500 truncate group-hover:text-gray-700">
+                            {{ $activity['detail'] }}
+                        </p>
+                        <p class="text-xs text-gray-400 mt-0.5">
+                            {{ $activity['group'] }}
+                            · {{ \Carbon\Carbon::parse($activity['time'])->diffForHumans() }}
+                        </p>
+                    </div>
+                    <div class="shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </a>
+            @endforeach
+        </div>
+    @endif
+</div>
 
                     {{-- Quick Links --}}
                     <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">

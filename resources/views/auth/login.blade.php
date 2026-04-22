@@ -25,7 +25,8 @@
 </div>
 
 
-//ban Session alert
+<!-- Banned User Message -->
+
 @if(session('banned'))
     <div class="mb-4 bg-red-50 border-2 border-red-200 rounded-xl p-5">
         <div class="flex items-start gap-3">

@@ -705,3 +705,34 @@ function escapeHtml(str) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
+
+const input = document.getElementById("institution");
+const datalist = document.getElementById("institution-list");
+
+input.addEventListener("input", async (e) => {
+    const query = e.target.value;
+
+    // Only search once the user types at least 3 characters
+    if (query.length < 3) return;
+
+    try {
+        // Fetching from a free global university API
+        const response = await fetch(
+            `http://universities.hipolabs.com/search?name=${query}`,
+        );
+        const data = await response.json();
+
+        // Clear previous suggestions
+        datalist.innerHTML = "";
+
+        // Filter for unique names and add to datalist
+        const uniqueNames = [...new Set(data.map((item) => item.name))];
+        uniqueNames.slice(0, 15).forEach((name) => {
+            const option = document.createElement("option");
+            option.value = name;
+            datalist.appendChild(option);
+        });
+    } catch (error) {
+        console.error("Error fetching institutions:", error);
+    }
+});

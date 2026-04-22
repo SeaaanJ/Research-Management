@@ -156,87 +156,94 @@
                 {{-- END LEFT --}}
 
                 {{-- RIGHT — Recent Activity --}}
-                <div class="space-y-6">
+<div class="space-y-6">
 
-                    <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
-                        <h3 class="text-sm font-bold text-gray-400 uppercase mb-4">
-                            Recent Activity
-                        </h3>
+    <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
+        <h3 class="text-sm font-bold text-gray-400 uppercase mb-4">
+            Recent Activity
+        </h3>
 
-                        @if($recentActivity->isEmpty())
-                            <p class="text-xs text-gray-400 text-center py-4">
-                                No recent activity.
-                            </p>
-                        @else
-                            <div class="space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto pr-1">
-                                @foreach($recentActivity as $activity)
-                                    <div class="flex items-start gap-3 hover:bg-gray-50 rounded-lg p-2 -mx-2 transition">
-                                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 mt-0.5
-                                            {{ $activity['color'] === 'indigo' ? 'bg-indigo-100 text-indigo-600' : '' }}
-                                            {{ $activity['color'] === 'yellow' ? 'bg-yellow-100 text-yellow-600' : '' }}
-                                            {{ $activity['color'] === 'green' ? 'bg-green-100 text-green-600' : '' }}
-                                            {{ $activity['color'] === 'purple' ? 'bg-purple-100 text-purple-600' : '' }}">
-                                            {{ $activity['icon'] }}
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <p class="text-xs font-semibold text-gray-700">
-                                                <span class="text-indigo-600">{{ $activity['user'] }}</span>
-                                                {{ $activity['message'] }}
-                                            </p>
-                                            <p class="text-xs text-gray-600 font-medium truncate">
-                                                {{ $activity['detail'] }}
-                                            </p>
-                                            @if($activity['context'])
-                                                <p class="text-xs text-gray-400 truncate">
-                                                    {{ $activity['context'] }}
-                                                </p>
-                                            @endif
-                                            <p class="text-xs text-gray-400 mt-0.5">
-                                                {{ \Carbon\Carbon::parse($activity['time'])->diffForHumans() }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
-
-                    {{-- Quick Actions --}}
-                    <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
-                        <h3 class="text-sm font-bold text-gray-400 uppercase mb-4">Quick Actions</h3>
-                        <div class="space-y-2">
-                            <button class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition text-left">
-                                <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center text-red-600 text-sm font-bold">
-                                    🚫
-                                </div>
-                                <div>
-                                    <p class="text-sm font-semibold text-gray-700">Ban User</p>
-                                    <p class="text-xs text-gray-400">Suspend account access</p>
-                                </div>
-                            </button>
-                            <button class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition text-left">
-                                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-sm font-bold">
-                                    📊
-                                </div>
-                                <div>
-                                    <p class="text-sm font-semibold text-gray-700">View Reports</p>
-                                    <p class="text-xs text-gray-400">Analytics and stats</p>
-                                </div>
-                            </button>
-                            <button class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition text-left">
-                                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-green-600 text-sm font-bold">
-                                    ⚙️
-                                </div>
-                                <div>
-                                    <p class="text-sm font-semibold text-gray-700">System Settings</p>
-                                    <p class="text-xs text-gray-400">Configure platform</p>
-                                </div>
-                            </button>
+        @if($recentActivity->isEmpty())
+            <p class="text-xs text-gray-400 text-center py-4">
+                No recent activity.
+            </p>
+        @else
+            <div class="space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto pr-1">
+                @foreach($recentActivity as $activity)
+                    <a href="{{ $activity['url'] }}"
+                       target="_blank"
+                       class="flex items-start gap-3 hover:bg-gray-50 rounded-lg p-2 -mx-2 transition cursor-pointer group">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 mt-0.5 transition group-hover:scale-110
+                            {{ $activity['color'] === 'indigo' ? 'bg-indigo-100 text-indigo-600 group-hover:bg-indigo-200' : '' }}
+                            {{ $activity['color'] === 'yellow' ? 'bg-yellow-100 text-yellow-600 group-hover:bg-yellow-200' : '' }}
+                            {{ $activity['color'] === 'green' ? 'bg-green-100 text-green-600 group-hover:bg-green-200' : '' }}
+                            {{ $activity['color'] === 'purple' ? 'bg-purple-100 text-purple-600 group-hover:bg-purple-200' : '' }}">
+                            {{ $activity['icon'] }}
                         </div>
-                    </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-semibold text-gray-700 group-hover:text-gray-900">
+                                <span class="text-{{ $activity['color'] }}-600">{{ $activity['user'] }}</span>
+                                {{ $activity['message'] }}
+                            </p>
+                            <p class="text-xs text-gray-600 font-medium truncate group-hover:text-gray-900">
+                                {{ $activity['detail'] }}
+                            </p>
+                            @if($activity['context'])
+                                <p class="text-xs text-gray-400 truncate">
+                                    {{ $activity['context'] }}
+                                </p>
+                            @endif
+                            <p class="text-xs text-gray-400 mt-0.5">
+                                {{ \Carbon\Carbon::parse($activity['time'])->diffForHumans() }}
+                            </p>
+                        </div>
+                        <div class="shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+        @endif
+    </div>
 
+    {{-- Quick Actions --}}
+    <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
+        <h3 class="text-sm font-bold text-gray-400 uppercase mb-4">Quick Actions</h3>
+        <div class="space-y-2">
+            <button class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition text-left">
+                <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center text-red-600 text-sm font-bold">
+                    🚫
                 </div>
-                {{-- END RIGHT --}}
+                <div>
+                    <p class="text-sm font-semibold text-gray-700">Ban User</p>
+                    <p class="text-xs text-gray-400">Suspend account access</p>
+                </div>
+            </button>
+            <button class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition text-left">
+                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-sm font-bold">
+                    📊
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-gray-700">View Reports</p>
+                    <p class="text-xs text-gray-400">Analytics and stats</p>
+                </div>
+            </button>
+            <button class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition text-left">
+                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-green-600 text-sm font-bold">
+                    ⚙️
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-gray-700">System Settings</p>
+                    <p class="text-xs text-gray-400">Configure platform</p>
+                </div>
+            </button>
+        </div>
+    </div>
+
+</div>
+{{-- END RIGHT --}}
 
             </div>
 

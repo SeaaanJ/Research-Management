@@ -14,26 +14,21 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
-
-     $users = User::where('role', 'user')
-        ->with('activeBan.banner')
-        ->withCount([
-            'groups',
-            'receivedInvites' => fn($q) => $q->where('status', 'pending')
-        ])
-        ->latest()
-        ->get();
-        // All users
+        // All users with ban status
         $users = User::where('role', 'user')
-            ->withCount(['groups', 'receivedInvites' => fn($q) => $q->where('status', 'pending')])
+            ->with('activeBan.banner')
+            ->withCount([
+                'groups',
+                'receivedInvites' => fn($q) => $q->where('status', 'pending')
+            ])
             ->latest()
             ->get();
 
         // Stats
-        $totalUsers       = User::where('role', 'user')->count();
-        $totalGroups      = Group::count();
-        $totalPapers      = ResearchPaper::count();
-        $publishedPapers  = ResearchPaper::where('published', true)->count();
+        $totalUsers      = User::where('role', 'user')->count();
+        $totalGroups     = Group::count();
+        $totalPapers     = ResearchPaper::count();
+        $publishedPapers = ResearchPaper::where('published', true)->count();
 
         // Recent activity — uploads, comments, group creation, invites
         $recentUploads = ResearchPaper::with(['uploader', 'group'])
@@ -50,6 +45,8 @@ class AdminDashboardController extends Controller
                 'time'      => $p->created_at,
                 'icon'      => '📄',
                 'color'     => 'indigo',
+                'url'       => route('groups.show', $p->group_id), // ✅ Group page
+                'paper_id'  => $p->id, // ✅ For future modal opening
             ]);
 
         $recentComments = PaperComment::with(['user', 'paper.group'])
@@ -66,6 +63,8 @@ class AdminDashboardController extends Controller
                 'time'      => $c->created_at,
                 'icon'      => '💬',
                 'color'     => 'yellow',
+                'url'       => route('groups.show', $c->paper->group_id), // ✅ Group page
+                'paper_id'  => $c->paper_id, // ✅ For future modal opening
             ]);
 
         $recentGroups = Group::with('owner')
@@ -82,6 +81,7 @@ class AdminDashboardController extends Controller
                 'time'      => $g->created_at,
                 'icon'      => '👥',
                 'color'     => 'green',
+                'url'       => route('groups.show', $g->id), // ✅ Group page
             ]);
 
         $recentInvites = GroupInvite::with(['sender', 'receiver', 'group'])
@@ -98,6 +98,7 @@ class AdminDashboardController extends Controller
                 'time'      => $i->created_at,
                 'icon'      => '✉️',
                 'color'     => 'purple',
+                'url'       => route('groups.show', $i->group_id), // ✅ Group page
             ]);
 
         // Merge and sort all activity
