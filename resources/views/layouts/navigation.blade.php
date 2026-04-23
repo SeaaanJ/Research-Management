@@ -14,7 +14,7 @@
 <div class="flex items-center gap-1 justify-center">
     @if(Auth::user()->isSuperAdmin())
         {{-- Super Admin sees all links --}}
-        <x-nav-link :href="route('super-admin.admins.create')" :active="request()->routeIs('super-admin.admins.*')">
+        <x-nav-link :href="route('super-admin.dashboard')" :active="request()->routeIs('super-admin.admins.*')">
             Admin Management
         </x-nav-link>
         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">

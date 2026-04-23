@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\SuperAdminDashboardController;
 use App\Http\Controllers\Admin\AdminBanController;
 use App\Http\Controllers\Admin\AdminGroupController;
+use App\Http\Controllers\Admin\SuperAdminController;
 
 // Landing Page
 Route::get('/', function () {
@@ -42,6 +43,13 @@ Route::middleware(['auth', 'verified', 'role:super_admin'])->prefix('super-admin
     Route::get('/dashboard', [SuperAdminDashboardController::class, 'index'])->name('super-admin.dashboard');
     Route::get('/admins/create', [SuperAdminDashboardController::class, 'createAdmin'])->name('super-admin.admins.create');
     Route::post('/admins', [SuperAdminDashboardController::class, 'storeAdmin'])->name('super-admin.admins.store');
+});
+
+
+Route::middleware(['auth', 'verified', 'role:super_admin'])->prefix('super-admin')->group(function () {
+    Route::get('/dashboard', [SuperAdminController::class, 'dashboard'])->name('super-admin.dashboard');
+    Route::get('/admins/create', [SuperAdminController::class, 'createAdminForm'])->name('super-admin.admins.create');
+    Route::post('/admins', [SuperAdminController::class, 'storeAdmin'])->name('super-admin.admins.store');
 });
 
 // Admin Routes

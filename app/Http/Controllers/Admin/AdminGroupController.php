@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Group;
 use App\Models\ResearchPaper;
+use Illuminate\Http\Request;
+use App\Models\AdminActivity;   
 
 class AdminGroupController extends Controller
 {
@@ -20,6 +22,15 @@ class AdminGroupController extends Controller
 
     public function show(Group $group)
     {
+    AdminActivity::log(
+        'view_group',
+        auth()->user()->first_name . ' viewed group "' . $group->name . '"',
+        [
+            'group_id'   => $group->id,
+            'group_name' => $group->name,
+        ]
+    );
+
         $group->load(['owner', 'users', 'invites']);
 
         $papers = ResearchPaper::where('group_id', $group->id)
