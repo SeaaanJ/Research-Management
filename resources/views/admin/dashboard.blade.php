@@ -208,39 +208,7 @@
         @endif
     </div>
 
-    {{-- Quick Actions --}}
-    <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
-        <h3 class="text-sm font-bold text-gray-400 uppercase mb-4">Quick Actions</h3>
-        <div class="space-y-2">
-            <button class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition text-left">
-                <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center text-red-600 text-sm font-bold">
-                    🚫
-                </div>
-                <div>
-                    <p class="text-sm font-semibold text-gray-700">Ban User</p>
-                    <p class="text-xs text-gray-400">Suspend account access</p>
-                </div>
-            </button>
-            <button class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition text-left">
-                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-sm font-bold">
-                    📊
-                </div>
-                <div>
-                    <p class="text-sm font-semibold text-gray-700">View Reports</p>
-                    <p class="text-xs text-gray-400">Analytics and stats</p>
-                </div>
-            </button>
-            <button class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition text-left">
-                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-green-600 text-sm font-bold">
-                    ⚙️
-                </div>
-                <div>
-                    <p class="text-sm font-semibold text-gray-700">System Settings</p>
-                    <p class="text-xs text-gray-400">Configure platform</p>
-                </div>
-            </button>
-        </div>
-    </div>
+    
 
 </div>
 {{-- END RIGHT --}}

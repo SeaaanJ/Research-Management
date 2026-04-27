@@ -9,19 +9,28 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-  public function index()
+ // app/Http/Controllers/DashboardController.php
+
+public function index()
 {
     $user   = Auth::user();
     $groups = $user->groups()->with(['users', 'invites'])->get() ?? collect();
 
+    // Published papers from user's groups
     $publishedPapers = ResearchPaper::whereIn('group_id', $groups->pluck('id'))
         ->where('published', true)
         ->with(['uploader', 'group'])
         ->latest('published_at')
         ->get();
 
-    $recentPublished = $publishedPapers->take(5);
+    // ✅ ALL published papers across the platform (for discovery feed at bottom)
+    $allPublishedPapers = ResearchPaper::where('published', true)
+        ->with(['uploader', 'group'])
+        ->latest('published_at')
+        ->take(20)
+        ->get();
 
+    // Recent activity
     $recentUploads = ResearchPaper::whereIn('group_id', $groups->pluck('id'))
         ->with(['uploader', 'group'])
         ->latest()
@@ -34,7 +43,7 @@ class DashboardController extends Controller
             'group'    => $p->group->name,
             'time'     => $p->created_at,
             'group_id' => $p->group_id,
-            'url'      => route('groups.show', $p->group_id), // ✅ Add URL
+            'url'      => route('groups.show', $p->group_id),
         ]);
 
     $recentComments = PaperComment::whereHas('paper', fn($q) =>
@@ -51,7 +60,7 @@ class DashboardController extends Controller
             'group'    => $c->paper->group->name,
             'time'     => $c->created_at,
             'group_id' => $c->paper->group_id,
-            'url'      => route('groups.show', $c->paper->group_id), // ✅ Add URL
+            'url'      => route('groups.show', $c->paper->group_id),
         ]);
 
     $recentActivity = $recentUploads->concat($recentComments)
@@ -64,9 +73,9 @@ class DashboardController extends Controller
     return view('dashboard', compact(
         'groups',
         'publishedPapers',
-        'recentPublished',
         'recentActivity',
-        'pendingInvites'
+        'pendingInvites',
+        'allPublishedPapers' // ✅ Add this
     ));
 }
 }

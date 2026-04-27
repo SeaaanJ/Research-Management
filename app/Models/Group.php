@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Group extends Model
 {
+    
     protected $fillable = ['name', 'description', 'user_id'];
 
     public function users()

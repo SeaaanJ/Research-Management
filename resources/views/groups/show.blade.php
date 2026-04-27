@@ -1,4 +1,12 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reach — Groups</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
 <x-app-layout>
+
+
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <div>
@@ -203,43 +211,65 @@
                                         </div>
 
                                         {{-- Actions Row --}}
-                                        <div class="flex items-center gap-2 flex-wrap pt-2 border-t border-gray-100">
+                                        {{-- Actions Row --}}
+<div class="flex items-center gap-2 flex-wrap pt-2 border-t border-gray-100">
 
-                                            {{-- View --}}
-                                            <button onclick="openViewModal(
-                                                {{ $paper->id }},
-                                                '{{ addslashes($paper->title) }}',
-                                                '{{ addslashes($paper->topic) }}',
-                                                '{{ $paper->file_type }}',
-                                                {{ $paper->published ? 'true' : 'false' }},
-                                                '{{ route('papers.view', $paper) }}',
-                                                '{{ route('papers.download', $paper) }}',
-                                                {{ $paper->user_id === auth()->id() ? 'true' : 'false' }}
-                                            )"
-                                            class="bg-gray-900 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-indigo-600 transition">
-                                                View
-                                            </button>
+    {{-- View --}}
+    <button onclick="openViewModal(
+        {{ $paper->id }},
+        '{{ addslashes($paper->title) }}',
+        '{{ addslashes($paper->topic ?? '') }}',
+        '{{ $paper->file_type }}',
+        {{ $paper->published ? 'true' : 'false' }},
+        '{{ route('papers.view', $paper) }}',
+        '{{ route('papers.download', $paper) }}',
+        {{ $group->user_id === auth()->id() ? 'true' : 'false' }}
+    )"
+        class="bg-gray-900 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-indigo-600 transition">
+        View
+    </button>
 
-                                            {{-- Download --}}
-                                            <a href="{{ route('papers.download', $paper) }}"
-                                               class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition">
-                                                Download
-                                            </a>
+    {{-- Download --}}
+    <a href="{{ route('papers.download', $paper) }}"
+       class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition">
+        Download
+    </a>
 
-                                            {{-- Delete (owner only) --}}
-                                            @if($paper->user_id === auth()->id())
-                                                <form method="POST" action="{{ route('papers.destroy', $paper) }}" class="ml-auto">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit"
-                                                        onclick="return confirm('Delete this paper?')"
-                                                        class="bg-red-100 text-red-600 text-xs px-3 py-1.5 rounded-lg hover:bg-red-200 transition">
-                                                        Delete
-                                                    </button>
-                                                </form>
-                                            @endif
+    {{-- ✅ Publish / Unpublish with Abstract --}}
+    @if($paper->user_id === auth()->id() || $group->user_id === auth()->id())
+        @if($paper->published)
+            <button onclick="unpublishPaper({{ $paper->id }})"
+                    class="bg-green-100 text-green-700 text-xs px-3 py-1.5 rounded-lg hover:bg-green-200 transition font-semibold">
+                Unpublish
+            </button>
+        @else
+            <button onclick="openPublishModal({{ $paper->id }}, '{{ addslashes($paper->title) }}')"
+                    class="bg-yellow-100 text-yellow-700 text-xs px-3 py-1.5 rounded-lg hover:bg-yellow-200 transition font-semibold border border-yellow-300">
+                Publish
+            </button>
+        @endif
+    @else
+        <button disabled
+                title="Only the uploader or group owner can publish"
+                class="bg-gray-100 text-gray-400 text-xs px-3 py-1.5 rounded-lg cursor-not-allowed font-semibold border border-gray-200">
+            Publish
+        </button>
+    @endif
 
-                                        </div>
+    {{-- Delete --}}
+    @if($paper->user_id === auth()->id())
+        <form method="POST" action="{{ route('papers.destroy', $paper) }}" class="ml-auto">
+            @csrf
+            @method('DELETE')
+            <button type="submit"
+                    onclick="return confirm('Delete this paper?')"
+                    class="bg-red-100 text-red-600 text-xs px-3 py-1.5 rounded-lg hover:bg-red-200 transition">
+                Delete
+            </button>
+        </form>
+    @endif
+
+</div>
                                     </div>
                                 @endforeach
                             </div>
@@ -344,6 +374,76 @@
 
         </div>
     </div>
+
+
+    {{-- ===== PUBLISH MODAL ===== --}}
+<div id="publishModal" class="fixed inset-0 z-[60] hidden">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closePublishModal()"></div>
+    <div class="relative flex items-center justify-center min-h-screen px-4 py-6">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-8 z-10 space-y-5">
+            
+            {{-- Header --}}
+            <div class="text-center">
+                <div class="text-4xl mb-2">📢</div>
+                <h3 class="text-xl font-black text-gray-900">Publish Paper</h3>
+                <p class="text-sm text-gray-500 mt-1">
+                    <span id="publishPaperTitle" class="font-bold text-indigo-600"></span>
+                </p>
+            </div>
+
+            {{-- Info Box --}}
+            <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+                <p class="text-sm text-indigo-700 font-semibold mb-2">
+                    ℹ️ Publishing this paper will:
+                </p>
+                <ul class="text-xs text-indigo-600 space-y-1 ml-5 list-disc">
+                    <li>Make it visible on all user dashboards</li>
+                    <li>Display the abstract to help others understand your work</li>
+                    <li>Allow others to view and download the paper</li>
+                </ul>
+            </div>
+
+            {{-- Error Message --}}
+            <div id="publishError" class="hidden bg-red-50 border border-red-300 text-red-700 text-sm px-4 py-3 rounded-xl flex items-center gap-2">
+                <span>⚠️</span>
+                <span id="publishErrorText"></span>
+            </div>
+
+            {{-- Form --}}
+            <form id="publishForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Abstract <span class="text-red-500">*</span>
+                    </label>
+                    <textarea id="publishAbstract"
+                              name="abstract"
+                              rows="8"
+                              required
+                              placeholder="Write a clear and concise abstract summarizing your research, methodology, findings, and conclusions..."
+                              class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"></textarea>
+                    <div class="flex justify-between items-center mt-1">
+                        <p class="text-xs text-gray-400">Minimum 100 characters required</p>
+                        <p id="charCount" class="text-xs text-gray-400">0 / 2000</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="button"
+                            onclick="closePublishModal()"
+                            class="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-xl hover:bg-gray-200 transition font-medium text-sm">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            id="publishSubmitBtn"
+                            class="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl hover:bg-indigo-700 transition font-bold text-sm">
+                        Publish Paper
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
 
 
     {{--VIEW PAPER MODAL--}}
@@ -483,6 +583,138 @@
         window.__groupOwnerId   = {{ $group->user_id }};
         window.__authFirstName  = @json(auth()->user()->first_name);
         window.__authLastName   = @json(auth()->user()->last_name);
+
+
+        let currentPublishPaperId = null;
+
+    function openPublishModal(paperId, paperTitle) {
+        currentPublishPaperId = paperId;
+        document.getElementById('publishPaperTitle').textContent = paperTitle;
+        document.getElementById('publishModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        
+        // Reset form
+        document.getElementById('publishForm').reset();
+        document.getElementById('publishError').classList.add('hidden');
+        document.getElementById('charCount').textContent = '0 / 2000';
+        document.getElementById('charCount').className = 'text-xs text-gray-400';
+    }
+
+    function closePublishModal() {
+        document.getElementById('publishModal').classList.add('hidden');
+        document.body.style.overflow = '';
+        currentPublishPaperId = null;
+    }
+
+    // Character counter
+    document.addEventListener('DOMContentLoaded', () => {
+        const abstractInput = document.getElementById('publishAbstract');
+        const charCount = document.getElementById('charCount');
+        
+        if (abstractInput) {
+            abstractInput.addEventListener('input', (e) => {
+                const length = e.target.value.length;
+                charCount.textContent = `${length} / 2000`;
+                
+                if (length < 100) {
+                    charCount.className = 'text-xs text-red-500 font-semibold';
+                } else if (length <= 2000) {
+                    charCount.className = 'text-xs text-green-600 font-semibold';
+                } else {
+                    charCount.className = 'text-xs text-red-500 font-semibold';
+                }
+            });
+        }
+    });
+
+    // Publish form submission
+    document.getElementById('publishForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const abstract = document.getElementById('publishAbstract').value.trim();
+        const btn = document.getElementById('publishSubmitBtn');
+        const errorDiv = document.getElementById('publishError');
+        const errorText = document.getElementById('publishErrorText');
+
+        // Validate
+        if (abstract.length < 100) {
+            errorDiv.classList.remove('hidden');
+            errorText.textContent = 'Abstract must be at least 100 characters long.';
+            return;
+        }
+
+        if (abstract.length > 2000) {
+            errorDiv.classList.remove('hidden');
+            errorText.textContent = 'Abstract must not exceed 2000 characters.';
+            return;
+        }
+
+        btn.textContent = 'Publishing...';
+        btn.disabled = true;
+        errorDiv.classList.add('hidden');
+
+        try {
+            const res = await fetch(`/papers/${currentPublishPaperId}/publish-with-abstract`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ abstract }),
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                closePublishModal();
+                window.location.reload();
+            } else {
+                errorDiv.classList.remove('hidden');
+                errorText.textContent = data.message || 'Failed to publish paper.';
+            }
+        } catch (error) {
+            console.error('Publish error:', error);
+            errorDiv.classList.remove('hidden');
+            errorText.textContent = 'Network error. Please try again.';
+        } finally {
+            btn.textContent = 'Publish Paper';
+            btn.disabled = false;
+        }
+    });
+
+    // Unpublish function
+    async function unpublishPaper(paperId) {
+        if (!confirm('Unpublish this paper? It will be removed from all dashboards.')) return;
+
+        try {
+            const res = await fetch(`/papers/${paperId}/unpublish`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || 'Failed to unpublish paper.');
+            }
+        } catch (error) {
+            console.error('Unpublish error:', error);
+            alert('Network error. Please try again.');
+        }
+    }
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closePublishModal();
+        }
+    });
     </script>
 
 </x-app-layout>

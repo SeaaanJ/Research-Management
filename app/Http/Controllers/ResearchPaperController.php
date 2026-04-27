@@ -1,8 +1,6 @@
 <?php
-// app/Http/Controllers/ResearchPaperController.php
 
 namespace App\Http\Controllers;
-
 use App\Models\Group;
 use App\Models\ResearchPaper;
 use Illuminate\Http\Request;
@@ -12,7 +10,7 @@ class ResearchPaperController extends Controller
     // View a group and its papers
     public function show(Group $group)
     {
-        // Make sure only group members can view
+        
         if (!$group->users->contains(auth()->id())) {
             abort(403, 'You are not a member of this group.');
         }
@@ -85,27 +83,59 @@ class ResearchPaperController extends Controller
     }
 
 
-    public function publish(ResearchPaper $paper)
-    {
-       $group = $paper->group;
+    public function publishWithAbstract(Request $request, ResearchPaper $researchPaper)
+{
+    $group = $researchPaper->group;
 
-        if($paper->published){
-         $paper-> update([
-            'published' => false,
-            'published_at' => null,
-         ]);
-         return back()->with('success', 'Paper unpublished successfully!');
-        }
+    // Only owner or uploader can publish
+    if ($group->user_id !== auth()->id() && $researchPaper->user_id !== auth()->id()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'You do not have permission to publish this paper.',
+        ], 403);
+    }
 
-        $paper->update([
-            'published' => true,
-            'published_at' => now(),
-        ]);
+    // Validate abstract
+    $request->validate([
+        'abstract' => 'required|string|min:100|max:2000',
+    ]);
 
-        return back()->with('success', 'Paper published successfully!');
+    // Publish the paper
+    $researchPaper->update([
+        'published'    => true,
+        'published_at' => now(),
+        'abstract'     => $request->abstract,
+    ]);
 
+    return response()->json([
+        'success' => true,
+        'message' => 'Paper published successfully!',
+    ]);
+}
 
-         } 
+public function unpublish(ResearchPaper $researchPaper)
+{
+    $group = $researchPaper->group;
+
+    // Only owner or uploader can unpublish
+    if ($group->user_id !== auth()->id() && $researchPaper->user_id !== auth()->id()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'You do not have permission to unpublish this paper.',
+        ], 403);
+    }
+
+    $researchPaper->update([
+        'published'    => false,
+        'published_at' => null,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Paper unpublished successfully.',
+    ]);
+}
+
 
           //  Publish all papers in a group
     public function publishAll(Group $group)

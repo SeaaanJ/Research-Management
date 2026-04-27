@@ -95,7 +95,8 @@ Route::middleware(['auth', 'verified', 'banned'])->group(function () {
     Route::post('/papers/{paper}/publish', [ResearchPaperController::class, 'publish'])->name('papers.publish');
     Route::post('/groups/{group}/publish-all', [ResearchPaperController::class, 'publishAll'])->name('papers.publishAll');
     Route::post('/groups/{group}/unpublish-all', [ResearchPaperController::class, 'unpublishAll'])->name('papers.unpublishAll');
-
+    Route::post('/papers/{researchPaper}/publish-with-abstract', [ResearchPaperController::class, 'publishWithAbstract'])->name('papers.publishWithAbstract');
+    Route::post('/papers/{researchPaper}/unpublish', [ResearchPaperController::class, 'unpublish'])->name('papers.unpublish');
     // Comments
     Route::get('/papers/{researchPaper}/comments', [PaperCommentController::class, 'index'])->name('comments.index');
     Route::post('/papers/{researchPaper}/comments', [PaperCommentController::class, 'store'])->name('comments.store');

@@ -12,6 +12,7 @@ class ResearchPaper extends Model
         'title',
         'topic',
         'description',
+        'abstract',
         'file_path',
         'file_name',
         'file_type',
