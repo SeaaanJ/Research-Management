@@ -1,4 +1,5 @@
 vendor;
 
-node_modules.git.env.log;
+node_modules.git.env;
+
 README.md;
