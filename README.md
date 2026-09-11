@@ -64,5 +64,11 @@ Start the development environment with php artisan serve and npm run dev.
 IT9A Project Notice
 This software is submitted as a requirement for the IT9A subject. It is designed to demonstrate proficiency in backend framework management, API consumption, and frontend state management.
 
-License
-This IT9A project is open-sourced software licensed under the MIT license.
+## Visit the Website
+
+You can visit the Research Management Software here:
+
+https://research-management-awzj.onrender.com/
+
+
+
