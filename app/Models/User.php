@@ -9,7 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Notifications\CustomVerifyEmail;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
